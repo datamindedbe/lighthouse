@@ -11,7 +11,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - lighthouse-{{ checksum "project/Dependencies.scala" }}-{{ checksum "build.sbt" }}
+            - lighthouse-{{ checksum "project/Dependencies.scala" }}
       - run:
           name: Compile and run tests
           command: sbt test
