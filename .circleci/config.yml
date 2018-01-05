@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/my-project
     docker:
-      - image: codestar/circleci-scala-sbt-git:scala-2.12.4-sbt-1.0.4
+      - image: circleci/openjdk:8-jdk
     environment:
         SBT_OPTS: -Xmx3200m
 
