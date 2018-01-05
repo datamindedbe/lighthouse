@@ -32,9 +32,9 @@ lazy val `lighthouse-platform` = (project in file("."))
   .enablePlugins(GitVersioning)
   .aggregate(`lighthouse-core`, `lighthouse-testing`)
 
-lazy val `lighthouse-core` = (project in file("candela-core"))
+lazy val `lighthouse-core` = (project in file("lighthouse-core"))
   .dependsOn(`lighthouse-testing` % "test->compile")
   .settings(buildSettings, libraryDependencies ++= commonDependencies ++ Seq(cats))
 
-lazy val `lighthouse-testing` = (project in file("candela-testing"))
+lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
   .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, sparkTestingBase))
