@@ -125,7 +125,7 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
       Row("Ron Swanson", 35)
     )
 
-    spark.read.parquet("./target/output/parquet/").collect().sortBy(_.getAs[Int]("age")) should contain only (
+    spark.read.parquet("./target/output/parquet").collect().sortBy(_.getAs[Int]("age")) should contain only (
       Row("Karl von Bauchspeck", 28),
       Row("Bernard Chanson", 34),
       Row("Ron Swanson", 35)

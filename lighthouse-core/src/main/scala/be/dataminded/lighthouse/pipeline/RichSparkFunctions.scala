@@ -31,7 +31,7 @@ object RichSparkFunctions extends LazyLogging {
     }
 
     def makeSnapshots(sinks: Sink*): SparkFunction[A] =
-      sinks.foldLeft(sparkFunction)((f, sink) => f.makeSnapshot(sink))
+      sinks.foldLeft(sparkFunction.persist())((f, sink) => f.makeSnapshot(sink))
 
     def count(): SparkFunction[Long] = {
       sparkFunction.map { dataSet =>
