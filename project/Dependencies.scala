@@ -2,10 +2,10 @@ import sbt._
 
 object Dependencies {
 
-  lazy val sparkCore = "org.apache.spark" %% "spark-core"  % "2.2.0" % Provided
-  lazy val sparkSql  = "org.apache.spark" %% "spark-sql"   % "2.2.0" % Provided
-  lazy val sparkHive = "org.apache.spark" %% "spark-hive"  % "2.2.0" % Provided
-  lazy val sparkMlib = "org.apache.spark" %% "spark-mllib" % "2.2.0" % Provided
+  lazy val sparkCore = "org.apache.spark" %% "spark-core"  % "2.2.1" % Provided
+  lazy val sparkSql  = "org.apache.spark" %% "spark-sql"   % "2.2.1" % Provided
+  lazy val sparkHive = "org.apache.spark" %% "spark-hive"  % "2.2.1" % Provided
+  lazy val sparkMlib = "org.apache.spark" %% "spark-mllib" % "2.2.1" % Provided
 
   lazy val scopt          = "com.github.scopt"           %% "scopt"          % "3.7.0"
   lazy val amazonSdk      = "com.amazonaws"              % "aws-java-sdk-s3" % "1.11.229"
