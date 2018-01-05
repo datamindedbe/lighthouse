@@ -7,6 +7,9 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.{BeforeAndAfter, Matchers}
 
+case class RawPerson(name: String, age: Int)
+case class BasePerson(firstName: String, lastName: String, age: Int)
+
 class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with BeforeAndAfter {
 
   val customerPath: String = File.resource("customers.csv").pathAsString
@@ -63,13 +66,10 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
       ))
   }
 
-  case class RawPerson(name: String, age: Int)
-
-  case class BasePerson(firstName: String, lastName: String, age: Int)
-
   sparkTest("A simple pipeline to test functionality") {
     val persons = SparkFunction { spark: SparkSession =>
-      Seq(RawPerson("Pascal Knapen", 34), RawPerson("Kris Peeters", 35), RawPerson("Pascal Knapen", 28)).toDS()
+      import spark.implicits._
+      Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
     }
 
     val pipeline = persons
@@ -84,12 +84,12 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
   sparkTest("A pipeline that combines multiple sources") {
     val persons = SparkFunction { spark: SparkSession =>
       import spark.implicits._
-      Seq(RawPerson("Pascal Knapen", 34), RawPerson("Kris Peeters", 35), RawPerson("Pascal Knapen", 28)).toDS()
+      Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
     }
 
     val morePersons = SparkFunction { spark: SparkSession =>
       import spark.implicits._
-      Seq(RawPerson("Pascal Knapen", 34), RawPerson("Kris Peeters", 35), RawPerson("Pascal Knapen", 28)).toDS()
+      Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
     }
 
     def combinePersons(left: Dataset[RawPerson], right: Dataset[RawPerson]) = left.union(right)
@@ -104,31 +104,31 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
       .run(spark)
       .collect()
       .sortBy(_.age) should contain only (
-      RawPerson("Pascal Knapen", 28),
-      RawPerson("Pascal Knapen", 34),
-      RawPerson("Kris Peeters", 35)
+      RawPerson("Karl von Bauchspeck", 28),
+      RawPerson("Bernard Chanson", 34),
+      RawPerson("Ron Swanson", 35)
     )
   }
 
   sparkTest("Test different sinks") {
     val persons = SparkFunction { spark: SparkSession =>
       import spark.implicits._
-      Seq(RawPerson("Pascal Knapen", 34), RawPerson("Kris Peeters", 35), RawPerson("Pascal Knapen", 28)).toDS()
+      Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
     }.map(PersonTransformations.dedup)
       .makeSnapshots(OrcSink("./target/output/orc"), ParquetSink("./target/output/parquet"))
 
     persons.run(spark)
 
-    spark.read.orc("./target/output/orc").collect().sortBy(_.getAs[Long]("age")) should contain only (
-      Row("Pascal Knapen", 28),
-      Row("Pascal Knapen", 34),
-      Row("Kris Peeters", 35)
+    spark.read.orc("./target/output/orc").collect().sortBy(_.getAs[Int]("age")) should contain only (
+      Row("Karl von Bauchspeck", 28),
+      Row("Bernard Chanson", 34),
+      Row("Ron Swanson", 35)
     )
 
-    spark.read.parquet("./target/output/parquet/").collect().sortBy(_.getAs[Long]("age")) should contain only (
-      Row("Pascal Knapen", 28),
-      Row("Pascal Knapen", 34),
-      Row("Kris Peeters", 35)
+    spark.read.parquet("./target/output/parquet/").collect().sortBy(_.getAs[Int]("age")) should contain only (
+      Row("Karl von Bauchspeck", 28),
+      Row("Bernard Chanson", 34),
+      Row("Ron Swanson", 35)
     )
   }
 
@@ -151,4 +151,5 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
 
     def returnBase(basePersons: Dataset[BasePerson]): Dataset[BasePerson] = basePersons
   }
+
 }

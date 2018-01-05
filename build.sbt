@@ -9,7 +9,11 @@ lazy val buildSettings = Seq(
   wartremoverWarnings in (Compile, compile) ++= Warts.allBut(Wart.DefaultArguments, Wart.FinalCaseClass, Wart.Throw),
   // Memory settings to be able to test with Spark
   fork in Test := true,
-  javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled"),
+  javaOptions ++= Seq("-Xms768M",
+                      "-Xmx2048M",
+                      "-XX:+CMSClassUnloadingEnabled",
+                      "-Dspark.sql.shuffle.partitions=2",
+                      "-Dspark.shuffle.sort.bypassMergeThreshold=2"),
   scalacOptions ++= Seq("-Ypartial-unification"),
   // Git versioning
   git.useGitDescribe := true,
