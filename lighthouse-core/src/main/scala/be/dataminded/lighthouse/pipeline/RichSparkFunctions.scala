@@ -2,6 +2,7 @@ package be.dataminded.lighthouse.pipeline
 
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.Dataset
+import org.apache.spark.storage.StorageLevel
 
 import scala.reflect.ClassTag
 
@@ -17,11 +18,11 @@ object RichSparkFunctions extends LazyLogging {
       dataSet
     }
 
-    def persist(): SparkFunction[A] = sparkFunction.map {
-      _.persist()
+    def cache(storageLevel: StorageLevel = StorageLevel.MEMORY_ONLY): SparkFunction[A] = sparkFunction.map {
+      _.persist(storageLevel)
     }
 
-    def unpersist(): SparkFunction[A] = sparkFunction.map {
+    def dropCache(): SparkFunction[A] = sparkFunction.map {
       _.unpersist()
     }
 
@@ -30,8 +31,9 @@ object RichSparkFunctions extends LazyLogging {
       data
     }
 
-    def makeSnapshots(sinks: Sink*): SparkFunction[A] =
-      sinks.foldLeft(sparkFunction.persist())((f, sink) => f.makeSnapshot(sink))
+    def makeSnapshots(sinks: Sink*): SparkFunction[A] = {
+      sinks.foldLeft(sparkFunction.cache())((f, sink) => f.makeSnapshot(sink))
+    }
 
     def count(): SparkFunction[Long] = {
       sparkFunction.map { dataSet =>
