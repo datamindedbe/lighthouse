@@ -28,11 +28,6 @@ jobs:
       - save_cache:
           key: lighthouse-{{ checksum "project/Dependencies.scala" }}-{{ checksum "build.sbt" }}
           paths:
-            - target/resolution-cache
-            - target/streams
-            - project/target/resolution-cache
-            - project/target/streams
             - ~/.sbt
             - ~/.coursier
-            - ~/.iv2/cache
-            - ~/.m2
+            - ~/.ivy2
