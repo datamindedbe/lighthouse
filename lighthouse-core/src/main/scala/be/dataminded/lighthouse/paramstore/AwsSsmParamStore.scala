@@ -23,3 +23,8 @@ class AwsSsmParamStore() {
     client.getParameter(getParameterRequest).getParameter.getValue
   }
 }
+
+/**
+  * Default SSM param store object to avoid duplicate creation
+  */
+object AwsSsmParamStore extends AwsSsmParamStore
