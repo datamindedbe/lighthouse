@@ -1,7 +1,7 @@
 package be.dataminded.lighthouse.pipeline
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, Encoder}
 import org.apache.spark.storage.StorageLevel
 
 import scala.reflect.ClassTag
@@ -17,6 +17,8 @@ object RichSparkFunctions extends LazyLogging {
       dataSet.printSchema()
       dataSet
     }
+
+    def as[T: Encoder]: SparkFunction[Dataset[T]] = sparkFunction.map(_.as[T])
 
     def cache(storageLevel: StorageLevel = StorageLevel.MEMORY_ONLY): SparkFunction[A] = sparkFunction.map {
       _.persist(storageLevel)

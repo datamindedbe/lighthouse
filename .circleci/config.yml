@@ -26,8 +26,11 @@ jobs:
       - store_artifacts: # Make test results downloadable as an artifact
           path: ~/junit
       - save_cache:
-          key: lighthouse-{{ checksum "project/Dependencies.scala" }}-{{ checksum "build.sbt" }}
+          key: lighthouse-{{ checksum "project/Dependencies.scala" }}
           paths:
             - ~/.sbt
             - ~/.coursier
             - ~/.ivy2
+      - run:
+          name: Publish artifacts to repository
+          command: sbt publish

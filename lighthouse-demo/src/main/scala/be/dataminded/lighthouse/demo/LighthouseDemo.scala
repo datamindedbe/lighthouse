@@ -1,78 +1,64 @@
 package be.dataminded.lighthouse.demo
 
+import be.dataminded.lighthouse.datalake._
+import be.dataminded.lighthouse.paramstore.AwsSsmParamStore
 import be.dataminded.lighthouse.spark.SparkApplication
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{Dataset, SaveMode}
 
-// TODO: to be restructured once lighthouse interfaces are more clear
+// DemoWarehouse or Warehouse could be provided via external classpath as well
+object DemoDatalake extends Datalake {
+  val ssmConfig: AwsSsmParamStore = new AwsSsmParamStore
 
-trait Environment {
-  // Sets the config environment you would like to use
-  def use(environment: String): Unit
-  def dataRef(metadata: MetadataRef): DataRef
-}
-
-object Environment extends Environment {
-  //TODO: Help mutability
-  private[this] var env: String = "default"
-
-  override def use(environment: String): Unit = {
-    env = environment
+  environment("prod") { references =>
+    references += (Volvo.UID -> new FileSystemDataLink("s3://bucket/raw/volvo"))
+    references += (Audi.UID  -> new HiveDataLink("s3://bucket/base/audi", "cars", "audi"))
+    references += (Mercedes.UID -> new JdbcDataLink(
+      ssmConfig.lookup("/ssm/url/path"),
+      ssmConfig.lookup("/ssm/user/path"),
+      ssmConfig.lookup("/ssm/pw/path"),
+      "com.mysql.jdbc.Driver",
+      "mercedes",
+      saveMode = SaveMode.Append
+    ))
   }
 
-  override def dataRef(metadata: MetadataRef): DataRef = new FileDataRef
+  environment("test") { references =>
+    references += (Volvo.UID    -> new FileSystemDataLink("data/raw/volvo"))
+    references += (Audi.UID     -> new FileSystemDataLink("data/base/audi"))
+    references += (Mercedes.UID -> new FileSystemDataLink("data/base/mercedes"))
+  }
 }
 
-trait Metadata {
-  val metadata: MetadataRef
+case class Audi(id: Int, carType: String, price: Float)
+object Audi {
+  val UID: DataUID = DataUID("raw.cars", "audi")
 }
 
-// TODO: Trait or class
-trait DataRef {
-  def readDF(): DataFrame
-  def readDS[T]: Dataset[T]
-  def write[T](dataset: Dataset[T])
+case class Volvo(id: Int, carType: String, price: Float)
+object Volvo {
+  val UID: DataUID = DataUID("base.cars", "volvo")
 }
 
-// TODO: define contructor params
-class FileDataRef extends DataRef {
-  override def readDF(): DataFrame                 = ???
-  override def readDS[T]: Dataset[T]               = ???
-  override def write[T](dataset: Dataset[T]): Unit = ???
-}
-
-// TODO: define contructor params
-class JDBCDataRef extends DataRef {
-  override def readDF(): DataFrame                 = ???
-  override def readDS[T]: Dataset[T]               = ???
-  override def write[T](dataset: Dataset[T]): Unit = ???
-}
-
-class MetadataRef(namespace: String, key: String) {}
-
-// Data definitions
-case class Audi(id: java.lang.Integer, brand: String, engine: String)
-object Audi extends Metadata {
-  val metadata = new MetadataRef(namespace = "topgear/cars", key = "Audi")
-}
-
-case class Volvo(id: java.lang.Integer, brand: String, engine: String)
-object Volvo extends Metadata {
-  val metadata = new MetadataRef(namespace = "topgear/cars", key = "Volvo")
+case class Mercedes(id: Int, carType: String, price: Float)
+object Mercedes {
+  val UID: DataUID = DataUID("export.cars", "mercedes")
 }
 
 object LighthouseDemo extends SparkApplication {
-  import spark.implicits._
-  Environment.use("production")
-  // Get audi data ref
-  val audiDataRef = Environment.dataRef(Audi.metadata)
-  // convert audi to volvo
-  val audiData: Dataset[Audi] = audiDataRef.readDS[Audi]
-  // convert Audi to Volvo with some transformations
-  val volvoData: Dataset[Volvo] = audiData.map(audi => Volvo(audi.id, audi.brand, audi.engine))
-  // get VolvoDataRef
-  val volvoDataRef = Environment.dataRef(Volvo.metadata)
-  // write volvo data
-  volvoDataRef.write(volvoData)
 
-  println("Demo implementation")
+  import spark.implicits._
+
+  // Get audi data ref
+  // TODO: properly document the system parameter that will be used for your environment
+  // TODO: Hide Volvo.metadata away with implicits? This also allows the type to be known in the datareference class as well
+  val volvoDataRef: DataLink = DemoDatalake.getDataLink(Volvo.UID)
+  // convert audi to volvo
+  val volvoData: Dataset[Volvo] = volvoDataRef.readAs[Volvo]()
+  // Turn Volvo into Audi
+  val audiData: Dataset[Audi] = volvoData.map[Audi]((volvo: Volvo) => Audi(volvo.id, volvo.carType, volvo.price))
+  // get VolvoDataRef
+  // TODO: Hide Audi.metadata away with implicits? This also allows the type to be known in the datareference class as well
+  val audiDataRef: DataLink = DemoDatalake.getDataLink(Audi.UID)
+  // write volvo data
+  audiDataRef.write(audiData)
 }

@@ -17,3 +17,5 @@ project/plugins/project/
 
 ## File-based project format:
 *.iws
+
+.DS_Store/

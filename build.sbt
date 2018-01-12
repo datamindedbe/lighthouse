@@ -9,18 +9,21 @@ lazy val buildSettings = Seq(
   wartremoverWarnings in (Compile, compile) ++= Warts.allBut(Wart.DefaultArguments, Wart.FinalCaseClass, Wart.Throw),
   // Memory settings to be able to test with Spark
   fork in Test := true,
-  javaOptions ++= Seq("-Xms768M",
-                      "-Xmx2048M",
-                      "-XX:+CMSClassUnloadingEnabled",
-                      "-Dspark.sql.shuffle.partitions=2",
-                      "-Dspark.shuffle.sort.bypassMergeThreshold=2"),
+  javaOptions ++= Seq(
+    "-Xms768M",
+    "-Xmx2048M",
+    "-XX:+CMSClassUnloadingEnabled",
+    "-Dspark.sql.shuffle.partitions=2",
+    "-Dspark.shuffle.sort.bypassMergeThreshold=2",
+    "-Dlighthouse.environment=test"
+  ),
   scalacOptions ++= Seq("-Ypartial-unification"),
   // Git versioning
   git.useGitDescribe := true,
   git.baseVersion := "0.0.0",
   // Publish like Maven
-  publishTo := Some(if (isSnapshot.value) datamindedSnapshots else datamindedReleases),
   publishMavenStyle := true,
+  publishTo := Some(if (isSnapshot.value) datamindedSnapshots else datamindedReleases),
   pomExtra :=
     <licenses>
       <license>
@@ -38,7 +41,7 @@ lazy val `lighthouse-platform` = (project in file("."))
 
 lazy val `lighthouse-core` = (project in file("lighthouse-core"))
   .dependsOn(`lighthouse-testing` % "test->compile")
-  .settings(buildSettings, libraryDependencies ++= commonDependencies ++ Seq(cats))
+  .settings(buildSettings, libraryDependencies ++= commonDependencies ++ amazonSdk ++ Seq(cats, typesafeConfig))
 
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
   .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, sparkTestingBase))
@@ -46,4 +49,3 @@ lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
   .dependsOn(`lighthouse-core`)
   .settings(buildSettings, libraryDependencies ++= commonDependencies)
-

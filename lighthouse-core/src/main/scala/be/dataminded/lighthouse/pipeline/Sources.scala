@@ -1,8 +1,11 @@
 package be.dataminded.lighthouse.pipeline
 
+import be.dataminded.lighthouse.datalake.DataLink
 import org.apache.spark.sql.DataFrame
 
 object Sources {
+
+  def fromDataLink(dataLink: DataLink): SparkFunction[DataFrame] = SparkFunction.of(dataLink.read())
 
   def fromOrc(path: String): SparkFunction[DataFrame] = SparkFunction { spark =>
     spark.read.orc(path)
