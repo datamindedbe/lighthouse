@@ -26,14 +26,18 @@ class JdbcDataLink(url: LazyConfig[String],
   require(driver() != null && driver().length > 0)
   require(table() != null && table().length > 0)
 
-  // build the connection properties
-  private[this] lazy val connectionProperties = {
+  // build the connection properties with some default extra ones
+  lazy val connectionProperties: Map[String, String] = {
     Map(
-      "url"      -> url(),
-      "driver"   -> driver(),
-      "table"    -> table(),
-      "user"     -> username(),
-      "password" -> password()
+      "url"                      -> url(),
+      "driver"                   -> driver(),
+      "table"                    -> table(),
+      "user"                     -> username(),
+      "password"                 -> password(),
+      "autoReconnect"            -> "true",
+      "failOverReadOnly"         -> "false",
+      "rewriteBatchedStatements" -> "true",
+      "useSSL"                   -> "false"
     ) ++ extraProperties
   }
 
