@@ -21,11 +21,12 @@ jobs:
             mkdir ~/junit/
             find . -type f -regex ".*/target/test-reports/.*xml" -exec cp {} ~/junit/ \;
           when: always
-      - run:
-          name: Save coverage results
-          command: |
-            mkdir ~/coverage/
-            cp -r ./target/scala-2.11/scoverage-report ~/coverage/
+#      - run:
+#          name: Save coverage results
+#          command: |
+#            mkdir ~/coverage/
+#            cp -r ./target/scala-2.11/scoverage-report ~/coverage/
+#          when: always
       - store_test_results: # Make test results visible in the UI
           path: ~/junit
       - store_artifacts: # Make test results downloadable as an artifact
