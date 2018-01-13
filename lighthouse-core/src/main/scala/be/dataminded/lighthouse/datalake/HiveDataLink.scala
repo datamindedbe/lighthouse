@@ -19,7 +19,8 @@ class HiveDataLink(val path: LazyConfig[String],
                    table: LazyConfig[String],
                    format: SparkFileFormat = Orc,
                    saveMode: SaveMode = SaveMode.Overwrite,
-                   partitionedBy: List[String] = List.empty)
+                   partitionedBy: List[String] = List.empty,
+                   options: Map[String, String] = Map.empty)
     extends PathBasedDataLinkTemplate {
 
   override def doRead(path: String): DataFrame = {
@@ -34,6 +35,7 @@ class HiveDataLink(val path: LazyConfig[String],
       .partitionBy(partitionedBy: _*)
       .mode(saveMode)
       .option("path", path)
+      .options(options)
       .saveAsTable(table())
   }
 }
