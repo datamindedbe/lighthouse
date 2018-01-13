@@ -21,7 +21,7 @@ class JdbcDataLink(url: LazyConfig[String],
                    extraProperties: Map[String, String] = Map.empty,
                    saveMode: SaveMode = SaveMode.Overwrite)
     extends DataLink {
-  
+
   // build the connection properties with some default extra ones
   lazy val connectionProperties: Map[String, String] = {
     Map(

@@ -8,7 +8,7 @@ object Dependencies {
   lazy val sparkCore = "org.apache.spark" %% "spark-core"  % sparkVersion % Provided
   lazy val sparkSql  = "org.apache.spark" %% "spark-sql"   % sparkVersion % Provided
   lazy val sparkHive = "org.apache.spark" %% "spark-hive"  % sparkVersion % Provided
-  lazy val sparkMlib = "org.apache.spark" %% "spark-mllib" % sparkVersion  % Provided
+  lazy val sparkMlib = "org.apache.spark" %% "spark-mllib" % sparkVersion % Provided
 
   lazy val scopt          = "com.github.scopt"           %% "scopt"          % "3.7.0"
   lazy val typesafeConfig = "com.typesafe"               % "config"          % "1.3.2"

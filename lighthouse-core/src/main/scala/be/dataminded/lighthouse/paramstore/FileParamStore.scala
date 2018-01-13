@@ -1,13 +1,14 @@
 package be.dataminded.lighthouse.paramstore
 
 import be.dataminded.lighthouse.common.FileSystem
+import be.dataminded.lighthouse.datalake.LazyConfig
 import com.typesafe.config.{Config, ConfigFactory}
 
 /**
   * Class helps retrieve secrets from typesafe [[Config]] file stored either on the local file system
   * or other supported storage backends.
   */
-class FileParamStore(path: String, overrides: Map[String, String] = Map()) {
+class FileParamStore(path: String, overrides: Map[String, String] = Map.empty) extends ParameterStore {
 
   private lazy val config: Config = {
     import scala.collection.JavaConverters._
@@ -18,12 +19,9 @@ class FileParamStore(path: String, overrides: Map[String, String] = Map()) {
 
   /**
     * Returns the lookup function to find a particular setting
-    * @param configPath The path where the variable is stored in the typesafe config
     * @param key The key to retrieve
     */
-  def lookupFunction(configPath: String, key: String): () => String = { () =>
-    {
-      this.config.getConfig(configPath).getString(key)
-    }
+  def lookup(key: String): LazyConfig[String] = LazyConfig {
+    config.getString(key)
   }
 }

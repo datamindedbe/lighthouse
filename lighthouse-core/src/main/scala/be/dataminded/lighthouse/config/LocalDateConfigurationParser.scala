@@ -25,7 +25,7 @@ class LocalDateConfigurationParser extends OptionParser[LocalDateConfiguration](
       LocalDate.parse(timestamp, DateTimeFormatter.ISO_LOCAL_DATE)
     } recover {
       case _ =>
-        LocalDate.parse(timestamp, DateTimeFormatters.SIMPLE_DATE_FORMAT)
+        LocalDate.parse(timestamp, DateTimeFormatters.SimpleDateFormat)
     } recover {
       case _ =>
         LocalDate.parse(timestamp, ofPattern("yyyy/MMdd"))

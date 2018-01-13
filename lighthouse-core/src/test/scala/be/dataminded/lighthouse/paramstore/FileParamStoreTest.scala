@@ -24,9 +24,8 @@ class FileParamStoreTest extends FunSuite with Matchers {
 
   test("Validation happens at call, not at retrieval") {
     val store    = new FileParamStore("/some/unexisting/file/path")
-    val function = store.lookupFunction("/some/config/path", "some/key")
+    val function = store.lookup("some.key")
 
     an[FileNotFoundException] should be thrownBy function.apply()
   }
 }
-

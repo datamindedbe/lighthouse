@@ -9,7 +9,7 @@ package object datalake {
   type LazyConfig[T] = () => T
 
   object LazyConfig {
-    def apply[T](value: T): LazyConfig[T] = () => value
+    def apply[T](body: => T): LazyConfig[T] = () => body()
   }
 
   implicit def asLazyConfig[T](value: T): LazyConfig[T] = () => value
