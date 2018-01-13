@@ -23,9 +23,9 @@ jobs:
           when: always
       - run:
           name: Save coverage results
-          command:
+          command: |
             mkdir ~/coverage/
-            cp ~/target/scala-2.11/scoverage-report/ ~/coverage/
+            cp -r ~/target/scala-2.11/scoverage-report/ ~/coverage/
       - store_test_results: # Make test results visible in the UI
           path: ~/junit
       - store_artifacts: # Make test results downloadable as an artifact
