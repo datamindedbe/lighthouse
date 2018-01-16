@@ -26,9 +26,6 @@ class LocalDateConfigurationParser extends OptionParser[LocalDateConfiguration](
     } recover {
       case _ =>
         LocalDate.parse(timestamp, DateTimeFormatters.SimpleDateFormat)
-    } recover {
-      case _ =>
-        LocalDate.parse(timestamp, ofPattern("yyyy/MMdd"))
     }).getOrElse(throw new IllegalArgumentException(s"The given timestamp: [$timestamp] could not be parsed"))
   }
 }
