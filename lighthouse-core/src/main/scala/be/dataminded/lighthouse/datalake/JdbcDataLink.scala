@@ -19,7 +19,7 @@ class JdbcDataLink(url: LazyConfig[String],
                    driver: LazyConfig[String],
                    table: LazyConfig[String],
                    extraProperties: Map[String, String] = Map.empty,
-                   saveMode: SaveMode = SaveMode.Overwrite)
+                   saveMode: SaveMode = SaveMode.Append)
     extends DataLink {
 
   // build the connection properties with some default extra ones
@@ -33,7 +33,9 @@ class JdbcDataLink(url: LazyConfig[String],
       "autoReconnect"            -> "true",
       "failOverReadOnly"         -> "false",
       "rewriteBatchedStatements" -> "true",
-      "useSSL"                   -> "false"
+      "useSSL"                   -> "false",
+      "zeroDateTimeBehavior"     -> "convertToNull",
+      "transformedBitIsBoolean"  -> "true"
     ) ++ extraProperties
   }
 
