@@ -56,70 +56,51 @@ class JdbcDataLink(url: LazyConfig[String],
 
   // The returns lowest and highest index of the partitionColumn if it exists
   private lazy val boundaries: Try[(Int, Int)] = {
-    //Try {
-    Class.forName(driver())
-    val query      = s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max from ${table()}"
-    val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
-    val statement  = connection.createStatement()
+    Try {
+      // Do this to make sure driver is loaded
+      Class.forName(driver())
+      // Execute query
+      val query      = s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max from ${table()}"
+      val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
+      val statement  = connection.createStatement()
 
-    println(s"query=$query, connection=$connection")
+      val result =
+        if (statement.execute(query) && statement.getResultSet.first) {
+          (statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"))
+        } else throw new SQLException("Min and max value could not be retrieved")
 
-    val result =
-      if (statement.execute(query)) {
-        println(statement)
-        println(statement.getResultSet.first())
-        println(statement.getResultSet)
-        println(statement.getResultSet.getInt("min"))
-        (statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"))
-      } else throw new SQLException("Min and max value could not be retrieved")
-
-    println(result)
-
-    connection.close()
-    Success(result)
-    //}
+      connection.close()
+      result
+    }
   }
 
   private def convertToMap(partitionColumn: String,
                            lowerBound: Int,
                            upperBound: Int,
                            numPartitions: Int): Map[String, String] = {
-    Map(
-      "partitionColumn" -> partitionColumn,
-      "lowerBound"      -> lowerBound.toString,
-      "upperBound"      -> upperBound.toString,
-      "numPartitions"   -> numPartitions.toString
-    )
+    Map("partitionColumn" -> partitionColumn,
+        "lowerBound"      -> lowerBound.toString,
+        "upperBound"      -> upperBound.toString,
+        "numPartitions"   -> numPartitions.toString)
   }
 
-  // Calculate the extra read parameters
+  // Get the extra partition parameters
   private lazy val partitionReadParams: Map[String, String] = {
     (partitionColumn(), boundaries, numberOfPartitions, batchSize) match {
-      case (partition, _, _, _) if partition == null || partition.isEmpty =>
-        println("case 1")
-        Map()
+      case (partition, _, _, _) if partition == null || partition.isEmpty => Map()
+      case (_, Failure(_), _, _)                                          => Map()
       case (_, _, numPart, batch)
           if numPart < 0 || batch < 0 || (numPart == 0 && batch == 0) || (numPart != 0 && batch != 0) =>
-        println("case 2")
         Map()
-      case (_, Failure(_), _, _) =>
-        println("case 3")
-        Map()
-      case (partition, Success((min, max)), numPart, _) if numPart != 0 =>
-        println("case 4")
-        convertToMap(partition, min, max, numPart)
+      case (partition, Success((min, max)), numPart, _) if numPart != 0 => convertToMap(partition, min, max, numPart)
       case (partition, Success((min, max)), _, batch) if batch != 0 =>
-        println("case 5")
-        println(s"((max - min) / batch) + 1 = ${((max - min) / batch) + 1}")
         convertToMap(partition, min, max, ((max - min) / batch) + 1)
-      case _ =>
-        println("case 6")
-        Map()
+      case _ => Map()
     }
   }
 
   override def read(): DataFrame = {
-    println(s"partitionReadParams = $partitionReadParams")
+    // Partition parameters are only applicable for read operation for now
     spark.read.jdbc(connectionProperties("url"),
                     connectionProperties("table"),
                     connectionProperties ++ partitionReadParams)
