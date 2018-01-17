@@ -20,7 +20,8 @@ import scala.util.{Failure, Success, Try}
   * @param extraProperties Additional properties to use to connect to the database
   * @param partitionColumn The column where you want to partition your data for, should contain an Integer type
   * @param numberOfPartitions Amount of partitions you want to use for reading or writing your data. If value is 0 then
-  *                           batchSize is taken to decide the number of partitions
+  *                           batchSize is taken to decide the number of partitions. If both numberOfPartitions and
+  *                           batchSize is not 0, numberOfPartitions takes preference
   * @param batchSize The amount of rows that you want to retrieve in one partition. If value is 0 number of partitions
   *                  is taken to decide the batch size
   * @param saveMode Spark sql SaveMode
@@ -54,20 +55,44 @@ class JdbcDataLink(url: LazyConfig[String],
     ) ++ extraProperties
   }
 
-  // The returns lowest and highest index of the partitionColumn if it exists
-  private lazy val boundaries: Try[(Int, Int)] = {
+  override def read(): DataFrame = {
+    // Partition parameters are only applicable for read operation for now
+    spark.read.jdbc(connectionProperties("url"),
+                    connectionProperties("table"),
+                    connectionProperties ++ partitionReadParams)
+  }
+
+  override def write[T](dataset: Dataset[T]): Unit = {
+    dataset.write.mode(saveMode).jdbc(connectionProperties("url"), connectionProperties("table"), connectionProperties)
+  }
+
+  private case class Boundaries(min: Int, max: Int, count: Int)
+
+  // The returns the minimum, maximum and total count of the partitionColumn
+  private def getBoundaries(partitions: Int = 0): Try[Boundaries] = {
     Try {
       // Do this to make sure driver is loaded
       Class.forName(driver())
-      // Execute query
-      val query      = s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max from ${table()}"
       val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
       val statement  = connection.createStatement()
 
-      val result =
-        if (statement.execute(query) && statement.getResultSet.first) {
-          (statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"))
-        } else throw new SQLException("Min and max value could not be retrieved")
+      // Only perform count when partitions are not set
+      val query = partitions match {
+        case p if p == 0 =>
+          s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max, count(${partitionColumn()}) as count from ${table()}"
+        case p if p > 0 => s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max from ${table()}"
+      }
+
+      // Execute query, and parse based on whether we need to take count into account
+      val result = (partitions, statement.execute(query), statement.getResultSet.first) match {
+        case (p, true, true) if p == 0 =>
+          Boundaries(statement.getResultSet.getInt("min"),
+                     statement.getResultSet.getInt("max"),
+                     statement.getResultSet.getInt("count"))
+        case (p, true, true) if p > 0 =>
+          Boundaries(statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"), 0)
+        case _ => throw new SQLException("Min, max and count value could not be retrieved")
+      }
 
       connection.close()
       result
@@ -86,27 +111,25 @@ class JdbcDataLink(url: LazyConfig[String],
 
   // Get the extra partition parameters
   private lazy val partitionReadParams: Map[String, String] = {
+    val boundaries = getBoundaries(numberOfPartitions)
+
     (partitionColumn(), boundaries, numberOfPartitions, batchSize) match {
+      // If no partition column is provided
       case (partition, _, _, _) if partition == null || partition.isEmpty => Map()
-      case (_, Failure(_), _, _)                                          => Map()
-      case (_, _, numPart, batch)
-          if numPart < 0 || batch < 0 || (numPart == 0 && batch == 0) || (numPart != 0 && batch != 0) =>
-        Map()
-      case (partition, Success((min, max)), numPart, _) if numPart != 0 => convertToMap(partition, min, max, numPart)
-      case (partition, Success((min, max)), _, batch) if batch != 0 =>
-        convertToMap(partition, min, max, ((max - min) / batch) + 1)
+
+      // If we were not able to retrieve the data boundaries
+      case (_, Failure(_), _, _) => Map()
+
+      // When the number of partitions is set
+      case (partition, Success(Boundaries(min, max, _)), numPart, _) if numPart > 0 =>
+        convertToMap(partition, min, max, numPart)
+
+      // When the batch size is set
+      case (partition, Success(Boundaries(min, max, count)), _, batch) if batch > 0 =>
+        convertToMap(partition, min, max, (count / batch) + 1)
+
+      // In all other cases
       case _ => Map()
     }
-  }
-
-  override def read(): DataFrame = {
-    // Partition parameters are only applicable for read operation for now
-    spark.read.jdbc(connectionProperties("url"),
-                    connectionProperties("table"),
-                    connectionProperties ++ partitionReadParams)
-  }
-
-  override def write[T](dataset: Dataset[T]): Unit = {
-    dataset.write.mode(saveMode).jdbc(connectionProperties("url"), connectionProperties("table"), connectionProperties)
   }
 }
