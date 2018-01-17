@@ -56,18 +56,28 @@ class JdbcDataLink(url: LazyConfig[String],
 
   // The returns lowest and highest index of the partitionColumn if it exists
   private lazy val boundaries: Try[(Int, Int)] = {
-    Try {
-      val query      = s"min($partitionColumn) as min, max($partitionColumn) as max from $table"
-      val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
-      val statement  = connection.createStatement()
+    //Try {
+    Class.forName(driver())
+    val query      = s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max from ${table()}"
+    val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
+    val statement  = connection.createStatement()
 
-      val result =
-        if (statement.execute(query)) (statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"))
-        else throw new SQLException("Min and max value could not be retrieved")
+    println(s"query=$query, connection=$connection")
 
-      connection.close()
-      result
-    }
+    val result =
+      if (statement.execute(query)) {
+        println(statement)
+        println(statement.getResultSet.first())
+        println(statement.getResultSet)
+        println(statement.getResultSet.getInt("min"))
+        (statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"))
+      } else throw new SQLException("Min and max value could not be retrieved")
+
+    println(result)
+
+    connection.close()
+    Success(result)
+    //}
   }
 
   private def convertToMap(partitionColumn: String,
@@ -78,23 +88,33 @@ class JdbcDataLink(url: LazyConfig[String],
       "partitionColumn" -> partitionColumn,
       "lowerBound"      -> lowerBound.toString,
       "upperBound"      -> upperBound.toString,
-      "numPartitions"   -> numberOfPartitions.toString
+      "numPartitions"   -> numPartitions.toString
     )
   }
 
   // Calculate the extra read parameters
   private lazy val partitionReadParams: Map[String, String] = {
-    (partitionColumn, boundaries, numberOfPartitions, batchSize) match {
-      case (partition, _, _, _) if partition != null && !partition().isEmpty => Map()
+    (partitionColumn(), boundaries, numberOfPartitions, batchSize) match {
+      case (partition, _, _, _) if partition == null || partition.isEmpty =>
+        println("case 1")
+        Map()
       case (_, _, numPart, batch)
           if numPart < 0 || batch < 0 || (numPart == 0 && batch == 0) || (numPart != 0 && batch != 0) =>
+        println("case 2")
         Map()
-      case (_, Failure(_), _, _) => Map()
+      case (_, Failure(_), _, _) =>
+        println("case 3")
+        Map()
       case (partition, Success((min, max)), numPart, _) if numPart != 0 =>
-        convertToMap(partition(), min, max, numPart)
+        println("case 4")
+        convertToMap(partition, min, max, numPart)
       case (partition, Success((min, max)), _, batch) if batch != 0 =>
-        convertToMap(partition(), min, max, ((max - min) / batch) + 1)
-      case _ => Map()
+        println("case 5")
+        println(s"((max - min) / batch) + 1 = ${((max - min) / batch) + 1}")
+        convertToMap(partition, min, max, ((max - min) / batch) + 1)
+      case _ =>
+        println("case 6")
+        Map()
     }
   }
 
