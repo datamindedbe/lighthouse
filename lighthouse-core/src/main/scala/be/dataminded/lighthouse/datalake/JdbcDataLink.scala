@@ -68,11 +68,13 @@ class JdbcDataLink(url: LazyConfig[String],
 
   private case class Boundaries(min: Int, max: Int, count: Int)
 
-  // The returns the minimum, maximum and total count of the partitionColumn
-  private def getBoundaries(partitions: Int = 0): Try[Boundaries] = {
+  // The returns the minimum, maximum (and total) count of the partitionColumn
+  private def getBoundaries(partitions: Int = numberOfPartitions): Try[Boundaries] = {
     Try {
       // Do this to make sure driver is loaded
       Class.forName(driver())
+
+      // Prepare database query statement
       val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
       val statement  = connection.createStatement()
 
@@ -114,10 +116,10 @@ class JdbcDataLink(url: LazyConfig[String],
     val boundaries = getBoundaries(numberOfPartitions)
 
     (partitionColumn(), boundaries, numberOfPartitions, batchSize) match {
-      // If no partition column is provided
+      // GUARD: If no partition column is provided
       case (partition, _, _, _) if partition == null || partition.isEmpty => Map()
 
-      // If we were not able to retrieve the data boundaries
+      // GUARD: If we were not able to retrieve the data boundaries
       case (_, Failure(_), _, _) => Map()
 
       // When the number of partitions is set
