@@ -1,9 +1,10 @@
 package be.dataminded.lighthouse.datalake
 
-import java.sql.{DriverManager, SQLException}
+import java.sql.{DriverManager, ResultSet, SQLException}
 
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
+import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
@@ -25,17 +26,19 @@ import scala.util.{Failure, Success, Try}
   * @param batchSize The amount of rows that you want to retrieve in one partition. If value is 0 number of partitions
   *                  is taken to decide the batch size
   * @param saveMode Spark sql SaveMode
+  * @param ignoredColumns Columns that should not be retrieved from table
   */
 class JdbcDataLink(url: LazyConfig[String],
                    username: LazyConfig[String],
                    password: LazyConfig[String],
                    driver: LazyConfig[String],
                    table: LazyConfig[String],
-                   extraProperties: Map[String, String] = Map.empty,
+                   extraProperties: LazyConfig[Map[String, String]] = LazyConfig(Map[String, String]()),
                    partitionColumn: LazyConfig[String] = "",
-                   numberOfPartitions: Int = 0,
-                   batchSize: Int = 50000,
-                   saveMode: SaveMode = SaveMode.Append)
+                   numberOfPartitions: LazyConfig[Int] = 0,
+                   batchSize: LazyConfig[Int] = 50000,
+                   saveMode: SaveMode = SaveMode.Append,
+                   ignoredColumns: LazyConfig[Seq[String]] = LazyConfig(Seq()))
     extends DataLink {
 
   // build the connection properties with some default extra ones
@@ -43,7 +46,7 @@ class JdbcDataLink(url: LazyConfig[String],
     Map(
       "url"                      -> url(),
       "driver"                   -> driver(),
-      "table"                    -> table(),
+      "dbtable"                  -> table(),
       "user"                     -> username(),
       "password"                 -> password(),
       "autoReconnect"            -> "true",
@@ -52,24 +55,61 @@ class JdbcDataLink(url: LazyConfig[String],
       "useSSL"                   -> "false",
       "zeroDateTimeBehavior"     -> "convertToNull",
       "transformedBitIsBoolean"  -> "true"
-    ) ++ extraProperties
+    ) ++ extraProperties()
   }
 
   override def read(): DataFrame = {
-    // Partition parameters are only applicable for read operation for now
-    spark.read.jdbc(connectionProperties("url"),
-                    connectionProperties("table"),
-                    connectionProperties ++ partitionReadParams)
+    // Partition parameters are only applicable for read operation for now, order is important as some values can
+    // be overwritten
+    val props    = connectionProperties ++ partitionReadParams ++ columnReadParams
+    val sparkCtx = props.foldLeft(spark.read.format("jdbc")) { case (x, (key, value)) => x.option(key, value) }
+    sparkCtx.load()
   }
 
   override def write[T](dataset: Dataset[T]): Unit = {
-    dataset.write.mode(saveMode).jdbc(connectionProperties("url"), connectionProperties("table"), connectionProperties)
+    dataset.write
+      .mode(saveMode)
+      .jdbc(connectionProperties("url"), connectionProperties("dbtable"), connectionProperties)
+  }
+
+  // Get the extra partition parameters
+  private lazy val partitionReadParams: Map[String, String] = {
+    val boundaries = getBoundaries(numberOfPartitions())
+
+    (partitionColumn(), boundaries, numberOfPartitions(), batchSize()) match {
+      // GUARD: If no partition column is provided.
+      case (partition, _, _, _) if partition == null || partition.isEmpty => Map()
+
+      // GUARD: If we were not able to retrieve the data boundaries.
+      case (_, Failure(_), _, _) => Map()
+
+      // When the number of partitions is set.
+      case (partition, Success(Boundaries(min, max, _)), numPart, _) if numPart > 0 =>
+        convertToReadParamsMap(partition, min, max, numPart)
+
+      // When the batch size is set.
+      case (partition, Success(Boundaries(min, max, count)), _, batch) if batch > 0 =>
+        convertToReadParamsMap(partition, min, max, (count / batch) + 1)
+
+      // In all other cases.
+      case _ => Map()
+    }
+  }
+
+  // Contains extra configuration for ignoring certain columns
+  private lazy val columnReadParams: Map[String, String] = {
+    val ignored = ignoredColumns()
+
+    (ignored, getColumns(ignored)) match {
+      case (Seq(), _) | (_, Failure(_)) => Map("dbtable" -> s"${table()}")
+      case (_, Success(cols))           => Map("dbtable" -> s"(select ${cols.mkString(",")} from ${table()}) as reduced")
+    }
   }
 
   private case class Boundaries(min: Int, max: Int, count: Int)
 
   // The returns the minimum, maximum (and total) count of the partitionColumn
-  private def getBoundaries(partitions: Int = numberOfPartitions): Try[Boundaries] = {
+  private def getBoundaries(partitions: Int = numberOfPartitions()): Try[Boundaries] = {
     Try {
       // Do this to make sure driver is loaded
       Class.forName(driver())
@@ -101,37 +141,41 @@ class JdbcDataLink(url: LazyConfig[String],
     }
   }
 
-  private def convertToMap(partitionColumn: String,
-                           lowerBound: Int,
-                           upperBound: Int,
-                           numPartitions: Int): Map[String, String] = {
+  // This function retrieves the columns needed for extraction of this table
+  private def getColumns(ignored: Seq[String] = ignoredColumns()): Try[Seq[String]] = {
+
+    @tailrec
+    def getNextColumn(cols: Seq[String], results: ResultSet): Seq[String] =
+      if (!results.next()) cols
+      else getNextColumn(cols ++ Seq(results.getString("cols")), results)
+
+    Try {
+      // Do this to make sure driver is loaded.
+      Class.forName(driver())
+
+      // Prepare database query statement.
+      val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
+      val statement  = connection.createStatement()
+      val query      = s"SELECT COLUMN_NAME as cols FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '${table()}'"
+
+      // Perform query and extract the results
+      if (!statement.execute(query)) {
+        connection.close()
+        throw new SQLException("Could not execute query")
+      }
+      // Return all columns that are not in the ignored list.
+      getNextColumn(Seq(), statement.getResultSet).filterNot(x => ignored.contains(x))
+    }
+  }
+
+  // Translate partition information to properties map usable by spark
+  private def convertToReadParamsMap(partitionColumn: String,
+                                     lowerBound: Int,
+                                     upperBound: Int,
+                                     numPartitions: Int): Map[String, String] = {
     Map("partitionColumn" -> partitionColumn,
         "lowerBound"      -> lowerBound.toString,
         "upperBound"      -> upperBound.toString,
         "numPartitions"   -> numPartitions.toString)
-  }
-
-  // Get the extra partition parameters
-  private lazy val partitionReadParams: Map[String, String] = {
-    val boundaries = getBoundaries(numberOfPartitions)
-
-    (partitionColumn(), boundaries, numberOfPartitions, batchSize) match {
-      // GUARD: If no partition column is provided
-      case (partition, _, _, _) if partition == null || partition.isEmpty => Map()
-
-      // GUARD: If we were not able to retrieve the data boundaries
-      case (_, Failure(_), _, _) => Map()
-
-      // When the number of partitions is set
-      case (partition, Success(Boundaries(min, max, _)), numPart, _) if numPart > 0 =>
-        convertToMap(partition, min, max, numPart)
-
-      // When the batch size is set
-      case (partition, Success(Boundaries(min, max, count)), _, batch) if batch > 0 =>
-        convertToMap(partition, min, max, (count / batch) + 1)
-
-      // In all other cases
-      case _ => Map()
-    }
   }
 }
