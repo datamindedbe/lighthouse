@@ -60,6 +60,6 @@ class FileSystemDataLinkTest extends SparkFunSuite with Matchers with BeforeAndA
   }
 
   after {
-//    ("target" / "output").delete(swallowIOExceptions = true)
+    file"target/output".delete(true)
   }
 }
