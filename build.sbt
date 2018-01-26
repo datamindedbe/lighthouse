@@ -1,5 +1,6 @@
 import Dependencies._
-import Resolvers.{datamindedReleases, datamindedSnapshots}
+import Opts.resolver.sonatypeSnapshots
+import Opts.resolver.sonatypeStaging
 
 lazy val buildSettings = Seq(
   organization := "be.dataminded",
@@ -23,15 +24,12 @@ lazy val buildSettings = Seq(
   git.baseVersion := "0.0.0",
   // Publish like Maven
   publishMavenStyle := true,
-  publishTo := Some(if (isSnapshot.value) datamindedSnapshots else datamindedReleases),
-  pomExtra :=
-    <licenses>
-      <license>
-        <name>Apache 2</name>
-        <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
+  publishTo := Some(if (isSnapshot.value) sonatypeSnapshots else sonatypeStaging),
+  homepage := Some(url("https://lighthouse.dataminded.be")),
+  scmInfo := Some(ScmInfo(url("https://github.com/dataminded/lighthouse"), "git@github.com:dataminded/lighthouse.git")),
+  developers := List(
+    Developer("mlavaert", "Mathias Lavaert", "mathias.lavaert@dataminded.be", url("https://github.com/mlavaert"))),
+  licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 )
 
 lazy val `lighthouse-platform` = (project in file("."))
