@@ -14,9 +14,9 @@ class DatalakeTest extends FunSuite with Matchers {
   }
 
   test("System property allows you to change environment") {
-    val warehouse = new SampleDatalake()
     System.setProperty(Datalake.SYSTEM_PROPERTY, "acc")
-    val dataRef = warehouse.getDataLink(warehouse.UID)
+    val warehouse = new SampleDatalake()
+    val dataRef   = warehouse.getDataLink(warehouse.UID)
 
     dataRef should equal(warehouse.accRef)
   }
