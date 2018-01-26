@@ -14,8 +14,9 @@ class TextSinkSpec extends FunSpec with SharedSparkSession with Matchers with Be
 
       SparkFunction.of(data).makeSnapshot(TextSink("./target/output/text")).run(spark)
 
-      ("target" / "output" / "text").glob("*.txt").map(_.contentAsString).toSeq should equal(
-        Stream("datadata\n", "datadatadata\n"))
+      ("target" / "output" / "text").glob("*.txt").map(_.contentAsString).toSeq should contain theSameElementsAs Seq(
+        "datadata\n",
+        "datadatadata\n")
     }
   }
 
