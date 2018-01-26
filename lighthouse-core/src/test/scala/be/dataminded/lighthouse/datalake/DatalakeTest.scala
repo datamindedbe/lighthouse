@@ -9,13 +9,13 @@ class DatalakeTest extends FunSuite with Matchers {
   val datalake = new SampleDatalake()
 
   test("A datalake uses the `test` environment by default") {
-    val dataRef   = datalake.getDataLink(datalake.UID)
+    val dataRef = datalake.getDataLink(datalake.UID)
 
     dataRef should equal(datalake.testRef)
   }
 
   test("A datalake can also retrieve properties through it's appy method") {
-    val dataRef   = datalake(datalake.UID)
+    val dataRef = datalake(datalake.UID)
 
     dataRef should equal(datalake.testRef)
   }
@@ -28,7 +28,7 @@ class DatalakeTest extends FunSuite with Matchers {
   }
 
   test("Once a reference is retrieved the environment cannot be changed") {
-    val testRef   = datalake.getDataLink(datalake.UID)
+    val testRef = datalake.getDataLink(datalake.UID)
     System.getProperty(Datalake.SYSTEM_PROPERTY, "acc")
     val accRef = datalake.getDataLink(datalake.UID)
 
@@ -40,7 +40,7 @@ class DatalakeTest extends FunSuite with Matchers {
   }
 
   test("Default Execution date is set to today") {
-    val dataRef   = datalake.getDataLink(datalake.snapshotUID).asInstanceOf[SnapshotDataLink]
+    val dataRef = datalake.getDataLink(datalake.snapshotUID).asInstanceOf[SnapshotDataLink]
 
     dataRef.date() should equal(LocalDate.now())
   }

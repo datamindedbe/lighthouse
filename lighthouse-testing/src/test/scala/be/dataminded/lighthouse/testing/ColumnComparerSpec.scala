@@ -7,7 +7,7 @@ class ColumnComparerSpec extends FunSpec with SharedSparkSession with ColumnComp
 
   import spark.implicits._
 
-  describe("#assertColumnEquality") {
+  describe("assertColumnEquality") {
 
     it("doesn't do anything if all the column values are equal") {
       val source = Seq((1, 1), (5, 5)).toDF("num", "expected")
@@ -66,7 +66,6 @@ class ColumnComparerSpec extends FunSpec with SharedSparkSession with ColumnComp
           ","
         )
       )
-
       assertColumnEquality(actual, "colors", "expected_colors")
     }
   }
