@@ -14,19 +14,19 @@ jobs:
             - lighthouse-{{ checksum "project/Dependencies.scala" }}
       - run:
           name: Compile and run tests
-          command: sbt coverage test coverageAggregate
+          command: sbt coverage test coverageReport coverageAggregate
       - run:
           name: Saving test results
           command: |
             mkdir ~/junit/
             find . -type f -regex ".*/target/test-reports/.*xml" -exec cp {} ~/junit/ \;
           when: always
-#      - run:
-#          name: Save coverage results
-#          command: |
-#            mkdir ~/coverage/
-#            cp -r ./target/scala-2.11/scoverage-report ~/coverage/
-#          when: always
+      - run:
+          name: Save coverage results
+          command: |
+            mkdir ~/coverage/
+            cp -r ./target/scala-2.11/scoverage-report ~/coverage/
+          when: always
       - store_test_results: # Make test results visible in the UI
           path: ~/junit
       - store_artifacts: # Make test results downloadable as an artifact
