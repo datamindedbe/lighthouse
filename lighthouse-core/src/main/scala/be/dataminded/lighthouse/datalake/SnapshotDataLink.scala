@@ -18,7 +18,6 @@ trait PathBasedDataLinkTemplate extends DataLink {
   def doRead(path: String): DataFrame
 
   def doWrite[T](data: Dataset[T], path: String)
-
 }
 
 class SnapshotDataLink(dataLink: PathBasedDataLinkTemplate, val date: LazyConfig[LocalDate])

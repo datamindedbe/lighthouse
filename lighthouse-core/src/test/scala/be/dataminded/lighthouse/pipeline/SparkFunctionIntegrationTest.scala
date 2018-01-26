@@ -1,16 +1,18 @@
 package be.dataminded.lighthouse.pipeline
 
-import be.dataminded.lighthouse.testing.SparkFunSuite
+import be.dataminded.lighthouse.testing.{DatasetComparer, SparkFunSuite}
 import better.files._
 import cats.implicits._
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.scalatest.{BeforeAndAfter, Matchers}
 
 case class RawPerson(name: String, age: Int)
 case class BasePerson(firstName: String, lastName: String, age: Int)
 
-class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with BeforeAndAfter {
+class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with BeforeAndAfter with DatasetComparer {
+
+  import spark.implicits._
 
   val customerPath: String = File.resource("customers.csv").pathAsString
   val ordersPath: String   = File.resource("orders.csv").pathAsString
@@ -56,14 +58,12 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
 
     val ordersByCustomer = orders.flatMap(countOrdersByCustomer)
 
-    val pipeline = (customers, ordersByCustomer).mapN(joinCustomersWithOrders).map(_.collect)
+    val result = (customers, ordersByCustomer).mapN(joinCustomersWithOrders).run(spark)
 
-    pipeline.run(spark) should equal(
-      Array(
-        Row("Bernard", "Chanson", 5),
-        Row("Ron", "Swanson", 3),
-        Row("Karl", "von Bauchspeck", 2)
-      ))
+    val expected = Seq(("Bernard", "Chanson", 5L), ("Ron", "Swanson", 3L), ("Karl", "von Bauchspeck", 2L))
+      .toDF("FIRST_NAME", "LAST_NAME", "COUNT")
+
+    assertDatasetEquality(result, expected)
   }
 
   sparkTest("A simple pipeline to test functionality") {
@@ -94,23 +94,20 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
 
     def combinePersons(left: Dataset[RawPerson], right: Dataset[RawPerson]) = left.union(right)
 
-    val combinedDataSet = for {
+    val pipeline = for {
       p <- persons
       m <- morePersons
-    } yield combinePersons(p, m)
+      combinedPersons = combinePersons(p, m)
+    } yield PersonTransformations.dedup(combinedPersons)
 
-    combinedDataSet
-      .map(PersonTransformations.dedup)
-      .run(spark)
-      .collect()
-      .sortBy(_.age) should contain only (
-      RawPerson("Karl von Bauchspeck", 28),
-      RawPerson("Bernard Chanson", 34),
-      RawPerson("Ron Swanson", 35)
+    assertDatasetEquality(
+      pipeline.run(spark),
+      Seq(RawPerson("Karl von Bauchspeck", 28), RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35)).toDS(),
+      orderedComparison = false
     )
   }
 
-  sparkTest("Test different sinks") {
+  sparkTest("A pipeline can write to multiple sinks at once") {
     val persons = SparkFunction { spark: SparkSession =>
       import spark.implicits._
       Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
@@ -119,17 +116,13 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
 
     persons.run(spark)
 
-    spark.read.orc("./target/output/orc").collect().sortBy(_.getAs[Int]("age")) should contain only (
-      Row("Karl von Bauchspeck", 28),
-      Row("Bernard Chanson", 34),
-      Row("Ron Swanson", 35)
-    )
+    val expected =
+      Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
 
-    spark.read.parquet("./target/output/parquet").collect().sortBy(_.getAs[Int]("age")) should contain only (
-      Row("Karl von Bauchspeck", 28),
-      Row("Bernard Chanson", 34),
-      Row("Ron Swanson", 35)
-    )
+    assertDatasetEquality(spark.read.orc("./target/output/orc").as[RawPerson], expected, orderedComparison = false)
+    assertDatasetEquality(spark.read.parquet("./target/output/parquet").as[RawPerson],
+                          expected,
+                          orderedComparison = false)
   }
 
   after {
@@ -151,5 +144,4 @@ class SparkFunctionIntegrationTest extends SparkFunSuite with Matchers with Befo
 
     def returnBase(basePersons: Dataset[BasePerson]): Dataset[BasePerson] = basePersons
   }
-
 }

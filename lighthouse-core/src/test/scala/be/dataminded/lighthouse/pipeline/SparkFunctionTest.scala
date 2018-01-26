@@ -2,33 +2,31 @@ package be.dataminded.lighthouse.pipeline
 
 import cats.implicits._
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{FunSpec, Matchers}
 
-class SparkFunctionTest extends WordSpec with Matchers {
-
-  "A SparkFunction" should {
-
+class SparkFunctionTest extends FunSpec with Matchers {
+  describe("A SparkFunction") {
     val spark: SparkSession = null
 
-    "be created from a single value" in {
+    it("should be created from a single value") {
       val pipeline = SparkFunction.of(123)
 
       pipeline.run(spark) should equal(123)
     }
 
-    "can be mapped with a given function" in {
+    it("can be mapped with a given function") {
       val pipeline = SparkFunction.of(123).map(number => number * 2)
 
       pipeline.run(spark) should equal(246)
     }
 
-    "cab be flatMapped with a given function" in {
+    it("cab be flatMapped with a given function") {
       val pipeline = SparkFunction.of(123).flatMap(number => SparkFunction.of(number * 2))
 
       pipeline.run(spark) should equal(246)
     }
 
-    "two SparkFunctions can be joined together" in {
+    it("two SparkFunctions can be joined together") {
       val result = for {
         first  <- SparkFunction.of("ab")
         second <- SparkFunction.of("cd")
@@ -37,7 +35,7 @@ class SparkFunctionTest extends WordSpec with Matchers {
       result.run(spark) should equal("abcd")
     }
 
-    "two SparkFunctions can be joined together using an ordinary function" in {
+    it("two SparkFunctions can be joined together using an ordinary function") {
       def mergeTwoWords(first: String, second: String) = first + second
       val result = for {
         first  <- SparkFunction.of("ab")
@@ -47,7 +45,7 @@ class SparkFunctionTest extends WordSpec with Matchers {
       result.run(spark) should equal("abcd")
     }
 
-    "the number of things that can be used together is not limited" in {
+    it("the number of things that can be used together is not limited") {
       def lotsOfTypes(int: Int, string: String, boolean: Boolean, double: Double) =
         Seq(int, string, boolean, double).mkString(" ")
 
@@ -61,7 +59,7 @@ class SparkFunctionTest extends WordSpec with Matchers {
       result.run(spark) should equal("1 A true 123.0")
     }
 
-    "two SparkFunctions can be joined together using some magic from the Cats-library" in {
+    it("two SparkFunctions can be joined together using some magic from the Cats-library") {
 
       def mergeTwoWords(first: String, second: String) = first + second
 
@@ -73,7 +71,7 @@ class SparkFunctionTest extends WordSpec with Matchers {
       result.run(spark) should equal("abcd")
     }
 
-    "can be used to build more complex pipelines" in {
+    it("can be used to build more complex pipelines") {
       val a = SparkFunction.of("a")
       val b = SparkFunction.of("b")
       val c = SparkFunction.of("c")

@@ -60,7 +60,6 @@ class LighthouseConfigurationParserTest extends FunSuite with Matchers with Befo
     config should be(None)
   }
 
-
   override protected def beforeEach(): Unit = {
     System.clearProperty(Datalake.SYSTEM_PROPERTY)
   }

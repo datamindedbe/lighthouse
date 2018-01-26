@@ -6,7 +6,6 @@ lazy val buildSettings = Seq(
   scalaVersion := "2.11.12",
   // Ensure code quality
   scalafmtOnCompile := true,
-  wartremoverWarnings in (Compile, compile) ++= Warts.allBut(Wart.DefaultArguments, Wart.FinalCaseClass, Wart.Throw),
   // Memory settings to be able to test with Spark
   fork in Test := true,
   javaOptions ++= Seq(
@@ -44,7 +43,7 @@ lazy val `lighthouse-core` = (project in file("lighthouse-core"))
   .settings(buildSettings, libraryDependencies ++= commonDependencies ++ amazonSdk ++ Seq(cats, typesafeConfig))
 
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
-  .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, sparkTestingBase))
+  .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, sparkTestingBase, betterFiles))
 
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
   .dependsOn(`lighthouse-core`)
