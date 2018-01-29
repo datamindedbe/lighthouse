@@ -1,7 +1,7 @@
 package be.dataminded.lighthouse.common
 
-import com.amazonaws.services.s3.{AmazonS3ClientBuilder, AmazonS3URI}
 import com.amazonaws.services.s3.model.S3Object
+import com.amazonaws.services.s3.{AmazonS3ClientBuilder, AmazonS3URI}
 
 import scala.io.Source
 

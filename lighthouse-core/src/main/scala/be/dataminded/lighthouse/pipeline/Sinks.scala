@@ -1,5 +1,6 @@
 package be.dataminded.lighthouse.pipeline
 
+import be.dataminded.lighthouse.datalake.DataLink
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.{Dataset, SaveMode}
 
@@ -90,4 +91,19 @@ class SingleFileSink(sink: Sink) extends Sink {
 
 object SingleFileSink {
   def apply(sink: Sink): SingleFileSink = new SingleFileSink(sink)
+}
+
+class DataLinkSink(dataLink: DataLink) extends Sink with LazyLogging {
+  override def write(data: Dataset[_]): SaveStatus = {
+    Try(dataLink.write(data)) match {
+      case Success(_) => SaveSuccess
+      case Failure(e) =>
+        logger.warn("Something went wrong writing the dataset", e)
+        SaveFailure
+    }
+  }
+}
+
+object DataLinkSink {
+  def apply(dataLink: DataLink): DataLinkSink = new DataLinkSink(dataLink)
 }

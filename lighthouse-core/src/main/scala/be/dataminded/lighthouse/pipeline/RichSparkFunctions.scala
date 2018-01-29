@@ -4,6 +4,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.{Dataset, Encoder}
 import org.apache.spark.storage.StorageLevel
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 object RichSparkFunctions extends LazyLogging {

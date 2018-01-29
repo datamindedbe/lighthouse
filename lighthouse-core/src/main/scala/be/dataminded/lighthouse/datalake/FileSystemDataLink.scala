@@ -1,7 +1,6 @@
 package be.dataminded.lighthouse.datalake
 
 import be.dataminded.lighthouse.spark.{Orc, SparkFileFormat}
-import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
 /**

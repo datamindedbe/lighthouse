@@ -16,4 +16,6 @@ package object datalake {
 
   implicit def asProperties(map: Map[String, String]): Properties =
     map.foldLeft(new Properties()) { case (props, (k, v)) => props.setProperty(k, v); props }
+
+  implicit def tupleAsDataUID(tuple: (String, String)): DataUID = DataUID(tuple._1, tuple._2)
 }

@@ -47,5 +47,5 @@ lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
   .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles))
 
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
-  .dependsOn(`lighthouse-core`)
+  .dependsOn(`lighthouse-core` , `lighthouse-testing` % "test->compile")
   .settings(buildSettings, libraryDependencies ++= commonDependencies)

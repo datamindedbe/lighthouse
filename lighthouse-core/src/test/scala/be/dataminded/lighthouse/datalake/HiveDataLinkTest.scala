@@ -2,7 +2,7 @@ package be.dataminded.lighthouse.datalake
 
 import be.dataminded.lighthouse.Models
 import be.dataminded.lighthouse.testing.SparkFunSuite
-import better.files.{File, _}
+import better.files._
 import org.scalatest.{BeforeAndAfter, Matchers}
 
 class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
