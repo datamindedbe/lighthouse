@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
 
-  private lazy val amazonSdkVersion = "1.11.229"
+  private lazy val amazonSdkVersion = "1.11.270"
   private lazy val sparkVersion     = "2.2.1"
 
   lazy val sparkCore = "org.apache.spark" %% "spark-core"  % sparkVersion % Provided
@@ -18,8 +18,7 @@ object Dependencies {
   lazy val cats        = "org.typelevel"        %% "cats-core"    % "1.0.1"
   lazy val betterFiles = "com.github.pathikrit" %% "better-files" % "3.4.0"
 
-  lazy val scalaTest        = "org.scalatest"   %% "scalatest"          % "3.0.3"
-  lazy val sparkTestingBase = "com.holdenkarau" %% "spark-testing-base" % "2.2.0_0.8.0"
+  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4"
 
   // AWS library dependencies
   lazy val amazonSdkS3  = "com.amazonaws" % "aws-java-sdk-s3"  % amazonSdkVersion

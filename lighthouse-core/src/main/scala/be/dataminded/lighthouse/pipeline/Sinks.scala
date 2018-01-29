@@ -47,7 +47,7 @@ class PartitionedOrcSink(path: String, partitionsColumns: Seq[String], mode: Sav
 }
 
 object PartitionedOrcSink {
-  def apply(path: String, partitionsColumns: Seq[String], mode: SaveMode): PartitionedOrcSink =
+  def apply(path: String, partitionsColumns: Seq[String], mode: SaveMode = SaveMode.Append): PartitionedOrcSink =
     new PartitionedOrcSink(path, partitionsColumns, mode)
 }
 
@@ -84,8 +84,7 @@ object ParquetSink {
 
 class SingleFileSink(sink: Sink) extends Sink {
   override def write(data: Dataset[_]): SaveStatus = {
-    data.repartition(1)
-    sink.write(data)
+    sink.write(data.repartition(1))
   }
 }
 

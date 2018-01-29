@@ -27,5 +27,4 @@ trait SparkSessions {
       }
       .enableHiveSupport()
       .getOrCreate()
-
 }

@@ -6,38 +6,43 @@ import org.scalatest.{FunSuite, Matchers}
 
 class DatalakeTest extends FunSuite with Matchers {
 
-  test("A warehouse uses the `test` environment by default") {
-    val warehouse = new SampleDatalake()
-    val dataRef   = warehouse.getDataLink(warehouse.UID)
+  val datalake = new SampleDatalake()
 
-    dataRef should equal(warehouse.testRef)
+  test("A datalake uses the `test` environment by default") {
+    val dataRef = datalake.getDataLink(datalake.UID)
+
+    dataRef should equal(datalake.testRef)
+  }
+
+  test("A datalake can also retrieve properties through it's appy method") {
+    val dataRef = datalake(datalake.UID)
+
+    dataRef should equal(datalake.testRef)
   }
 
   test("System property allows you to change environment") {
     System.setProperty(Datalake.SYSTEM_PROPERTY, "acc")
-    val warehouse = new SampleDatalake()
-    val dataRef   = warehouse.getDataLink(warehouse.UID)
+    val datalake = new SampleDatalake()
 
-    dataRef should equal(warehouse.accRef)
+    val dataRef = datalake.getDataLink(datalake.UID)
+
+    dataRef should equal(datalake.accRef)
   }
 
   test("Once a reference is retrieved the environment cannot be changed") {
-    val warehouse = new SampleDatalake()
-    val testRef   = warehouse.getDataLink(warehouse.UID)
+    val testRef = datalake.getDataLink(datalake.UID)
     System.getProperty(Datalake.SYSTEM_PROPERTY, "acc")
-    val accRef = warehouse.getDataLink(warehouse.UID)
+    val accRef = datalake.getDataLink(datalake.UID)
 
     testRef should equal(accRef)
   }
 
   test("Exception is thrown when requesting an unknown reference") {
-    val warehouse = new SampleDatalake()
-    an[NoSuchElementException] should be thrownBy warehouse.getDataLink(DataUID("datamined", "unknown_key"))
+    an[NoSuchElementException] should be thrownBy datalake.getDataLink(DataUID("datamined", "unknown_key"))
   }
 
   test("Default Execution date is set to today") {
-    val warehouse = new SampleDatalake()
-    val dataRef   = warehouse.getDataLink(warehouse.snapshotUID).asInstanceOf[SnapshotDataLink]
+    val dataRef = datalake.getDataLink(datalake.snapshotUID).asInstanceOf[SnapshotDataLink]
 
     dataRef.date() should equal(LocalDate.now())
   }
