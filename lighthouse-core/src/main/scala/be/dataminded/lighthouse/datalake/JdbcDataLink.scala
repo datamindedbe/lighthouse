@@ -1,10 +1,9 @@
 package be.dataminded.lighthouse.datalake
 
-import java.sql.{DriverManager, ResultSet, SQLException}
+import java.sql.{DriverManager, SQLException}
 
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
-import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
@@ -26,19 +25,17 @@ import scala.util.{Failure, Success, Try}
   * @param batchSize The amount of rows that you want to retrieve in one partition. If value is 0 number of partitions
   *                  is taken to decide the batch size
   * @param saveMode Spark sql SaveMode
-  * @param ignoredColumns Columns that should not be retrieved from table
   */
 class JdbcDataLink(url: LazyConfig[String],
                    username: LazyConfig[String],
                    password: LazyConfig[String],
                    driver: LazyConfig[String],
                    table: LazyConfig[String],
-                   extraProperties: LazyConfig[Map[String, String]] = LazyConfig(Map[String, String]()),
+                   extraProperties: LazyConfig[Map[String, String]] = LazyConfig(Map.empty[String, String]),
                    partitionColumn: LazyConfig[String] = "",
                    numberOfPartitions: LazyConfig[Int] = 0,
                    batchSize: LazyConfig[Int] = 50000,
-                   saveMode: SaveMode = SaveMode.Append,
-                   ignoredColumns: LazyConfig[Seq[String]] = LazyConfig(Seq()))
+                   saveMode: SaveMode = SaveMode.Append)
     extends DataLink {
 
   // build the connection properties with some default extra ones
@@ -48,21 +45,15 @@ class JdbcDataLink(url: LazyConfig[String],
       "driver"                   -> driver(),
       "dbtable"                  -> table(),
       "user"                     -> username(),
-      "password"                 -> password(),
-      "autoReconnect"            -> "true",
-      "failOverReadOnly"         -> "false",
-      "rewriteBatchedStatements" -> "true",
-      "useSSL"                   -> "false",
-      "zeroDateTimeBehavior"     -> "convertToNull",
-      "transformedBitIsBoolean"  -> "true"
+      "password"                 -> password()
     ) ++ extraProperties()
   }
 
   override def read(): DataFrame = {
     // Partition parameters are only applicable for read operation for now, order is important as some values can
     // be overwritten
-    val props    = connectionProperties ++ partitionReadParams ++ columnReadParams
-    val sparkCtx = props.foldLeft(spark.read.format("jdbc")) { case (x, (key, value)) => x.option(key, value) }
+    val props    = connectionProperties ++ partitionReadParams
+    val sparkCtx = spark.read.format("jdbc").options(props)
     sparkCtx.load()
   }
 
@@ -96,17 +87,7 @@ class JdbcDataLink(url: LazyConfig[String],
     }
   }
 
-  // Contains extra configuration for ignoring certain columns
-  private lazy val columnReadParams: Map[String, String] = {
-    val ignored = ignoredColumns()
-
-    (ignored, getColumns(ignored)) match {
-      case (Seq(), _) | (_, Failure(_)) => Map("dbtable" -> s"${table()}")
-      case (_, Success(cols))           => Map("dbtable" -> s"(select ${cols.mkString(",")} from ${table()}) as reduced")
-    }
-  }
-
-  private case class Boundaries(min: Int, max: Int, count: Int)
+  private case class Boundaries(min: Long, max: Long, count: Long)
 
   // The returns the minimum, maximum (and total) count of the partitionColumn
   private def getBoundaries(partitions: Int = numberOfPartitions()): Try[Boundaries] = {
@@ -125,54 +106,29 @@ class JdbcDataLink(url: LazyConfig[String],
         case p if p > 0 => s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max from ${table()}"
       }
 
-      // Execute query, and parse based on whether we need to take count into account
-      val result = (partitions, statement.execute(query), statement.getResultSet.first) match {
-        case (p, true, true) if p == 0 =>
-          Boundaries(statement.getResultSet.getInt("min"),
-                     statement.getResultSet.getInt("max"),
-                     statement.getResultSet.getInt("count"))
-        case (p, true, true) if p > 0 =>
-          Boundaries(statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"), 0)
-        case _ => throw new SQLException("Min, max and count value could not be retrieved")
+      // Make sure that connection is closed when an exception is thrown
+      try {
+        // Execute query, and parse based on whether we need to take count into account
+        val result = (partitions, statement.execute(query), statement.getResultSet.first) match {
+          case (p, true, true) if p == 0 =>
+            Boundaries(statement.getResultSet.getInt("min"),
+              statement.getResultSet.getInt("max"),
+              statement.getResultSet.getInt("count"))
+          case (p, true, true) if p > 0 =>
+            Boundaries(statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"), 0)
+          case _ => throw new SQLException("Min, max and count value could not be retrieved")
+        }
+        result
       }
-
-      connection.close()
-      result
-    }
-  }
-
-  // This function retrieves the columns needed for extraction of this table
-  private def getColumns(ignored: Seq[String] = ignoredColumns()): Try[Seq[String]] = {
-
-    @tailrec
-    def getNextColumn(cols: Seq[String], results: ResultSet): Seq[String] =
-      if (!results.next()) cols
-      else getNextColumn(cols ++ Seq(results.getString("cols")), results)
-
-    Try {
-      // Do this to make sure driver is loaded.
-      Class.forName(driver())
-
-      // Prepare database query statement.
-      val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
-      val statement  = connection.createStatement()
-      val query      = s"SELECT COLUMN_NAME as cols FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '${table()}'"
-
-      // Perform query and extract the results
-      if (!statement.execute(query)) {
-        connection.close()
-        throw new SQLException("Could not execute query")
-      }
-      // Return all columns that are not in the ignored list.
-      getNextColumn(Seq(), statement.getResultSet).filterNot(x => ignored.contains(x))
+      finally connection.close()
     }
   }
 
   // Translate partition information to properties map usable by spark
   private def convertToReadParamsMap(partitionColumn: String,
-                                     lowerBound: Int,
-                                     upperBound: Int,
-                                     numPartitions: Int): Map[String, String] = {
+                                     lowerBound: Long,
+                                     upperBound: Long,
+                                     numPartitions: Long): Map[String, String] = {
     Map("partitionColumn" -> partitionColumn,
         "lowerBound"      -> lowerBound.toString,
         "upperBound"      -> upperBound.toString,
