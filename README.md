@@ -6,9 +6,9 @@ It provides high-level APIs in Scala to streamline data pipelines and apply best
 
 ## Principles
 
-- A library, NOT a framework
 - Configuration as code
 - Idempotent execution
+- Utilities for easier building and testing Apache Spark based applications
 
 ## Online Documentation
 
