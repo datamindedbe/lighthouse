@@ -41,11 +41,11 @@ class JdbcDataLink(url: LazyConfig[String],
   // build the connection properties with some default extra ones
   lazy val connectionProperties: Map[String, String] = {
     Map(
-      "url"                      -> url(),
-      "driver"                   -> driver(),
-      "dbtable"                  -> table(),
-      "user"                     -> username(),
-      "password"                 -> password()
+      "url"      -> url(),
+      "driver"   -> driver(),
+      "dbtable"  -> table(),
+      "user"     -> username(),
+      "password" -> password()
     ) ++ extraProperties()
   }
 
@@ -112,15 +112,14 @@ class JdbcDataLink(url: LazyConfig[String],
         val result = (partitions, statement.execute(query), statement.getResultSet.first) match {
           case (p, true, true) if p == 0 =>
             Boundaries(statement.getResultSet.getInt("min"),
-              statement.getResultSet.getInt("max"),
-              statement.getResultSet.getInt("count"))
+                       statement.getResultSet.getInt("max"),
+                       statement.getResultSet.getInt("count"))
           case (p, true, true) if p > 0 =>
             Boundaries(statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"), 0)
           case _ => throw new SQLException("Min, max and count value could not be retrieved")
         }
         result
-      }
-      finally connection.close()
+      } finally connection.close()
     }
   }
 
