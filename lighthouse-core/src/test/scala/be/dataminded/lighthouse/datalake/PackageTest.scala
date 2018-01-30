@@ -4,7 +4,7 @@ import java.util.Properties
 
 import org.scalatest.{FunSpec, Matchers}
 
-class packageTest extends FunSpec with Matchers {
+class PackageTest extends FunSpec with Matchers {
 
   describe("asProperties") {
     it("should convert a Scala to Java Properties implicitly") {

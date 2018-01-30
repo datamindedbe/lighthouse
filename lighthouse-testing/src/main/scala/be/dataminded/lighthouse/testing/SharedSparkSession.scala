@@ -3,8 +3,6 @@ package be.dataminded.lighthouse.testing
 import better.files.File
 import org.apache.spark.sql.SparkSession
 
-import scala.util.Try
-
 trait SharedSparkSession {
 
   private object AutoImport {
@@ -31,8 +29,4 @@ trait SharedSparkSession {
     .config("spark.ui.enabled", "false")
     .enableHiveSupport()
     .getOrCreate()
-
-  sys.addShutdownHook {
-    Try(spark.stop())
-  }
 }

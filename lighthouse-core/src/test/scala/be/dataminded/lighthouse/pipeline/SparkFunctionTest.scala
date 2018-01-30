@@ -13,8 +13,6 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
   import spark.implicits._
 
   describe("A SparkFunction can be used without SparkSession") {
-    val spark: SparkSession = null
-
     it("should be created from a single value") {
       val pipeline = SparkFunction.of(123)
 
