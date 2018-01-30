@@ -1,6 +1,6 @@
 package be.dataminded.lighthouse.paramstore
 
-import java.io.FileNotFoundException
+import java.nio.file.NoSuchFileException
 
 import org.scalatest.{FunSuite, Matchers}
 
@@ -26,6 +26,6 @@ class FileParamStoreTest extends FunSuite with Matchers {
     val store    = new FileParamStore("/some/unexisting/file/path")
     val function = store.lookup("some.key")
 
-    an[FileNotFoundException] should be thrownBy function.apply()
+    an[NoSuchFileException] should be thrownBy function.apply()
   }
 }

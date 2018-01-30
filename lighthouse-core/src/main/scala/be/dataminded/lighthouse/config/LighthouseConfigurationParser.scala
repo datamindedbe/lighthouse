@@ -36,16 +36,16 @@ class LighthouseConfigurationParser extends OptionParser[LighthouseConfiguration
   override def parse(args: Seq[String], init: LighthouseConfiguration): Option[LighthouseConfiguration] = {
     super.parse(args, init) match {
       case success @ Some(config) =>
-        System.setProperty(Datalake.SYSTEM_PROPERTY, config.environment)
+        System.setProperty(Datalake.PropertyName, config.environment)
         success
       case None => None
     }
   }
 
   private def fallbackEnvironment(): String = {
-    Option(System.getProperty(Datalake.SYSTEM_PROPERTY))
+    Option(System.getProperty(Datalake.PropertyName))
       .orElse(Option(System.getenv("LIGHTHOUSE_ENVIRONMENT")))
-      .getOrElse(new SparkConf().get(Datalake.SYSTEM_PROPERTY, ""))
+      .getOrElse(new SparkConf().get(Datalake.PropertyName, ""))
 
   }
 }

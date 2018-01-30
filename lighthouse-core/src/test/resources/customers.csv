@@ -1,4 +1,4 @@
-ID,FIRST_NAME,LAST_NAME,YEAR_OF_BIRTH
+id,firstName,lastName,yearOfBirth
 1,Bernard,Chanson,1991
 2,Ron,Swanson,1964
 3,Karl,von Bauchspeck,1932

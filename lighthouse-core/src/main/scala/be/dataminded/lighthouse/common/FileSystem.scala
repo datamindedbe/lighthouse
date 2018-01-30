@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.{AmazonS3ClientBuilder, AmazonS3URI}
 
 import scala.io.Source
+import better.files._
 
 /**
   * Object helps abstract common file system operations
@@ -27,20 +28,11 @@ class S3FileSystem extends FileSystem {
     val s3Client           = AmazonS3ClientBuilder.standard().build()
     val uri: AmazonS3URI   = new AmazonS3URI(path)
     val s3Object: S3Object = s3Client.getObject(uri.getBucket, uri.getKey)
-    s3Object.getObjectContent
 
-    val source = Source.fromInputStream(s3Object.getObjectContent)
-    val lines = try source.mkString
-    finally source.close()
-    lines
+    s3Object.getObjectContent.asString()
   }
 }
 
 class LocalFileSystem extends FileSystem {
-  override def read(path: String): String = {
-    val source = scala.io.Source.fromFile(path)
-    val lines = try source.mkString
-    finally source.close()
-    lines
-  }
+  override def read(path: String): String = file"$path".contentAsString
 }

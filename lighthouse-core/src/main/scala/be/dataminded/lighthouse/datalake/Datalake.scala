@@ -3,8 +3,8 @@ package be.dataminded.lighthouse.datalake
 import scala.collection.mutable
 
 object Datalake {
-  val SYSTEM_PROPERTY     = "lighthouse.environment"
-  val DEFAULT_ENVIRONMENT = "test"
+  val PropertyName       = "lighthouse.environment"
+  val DefaultEnvironment = "test"
 }
 
 /**
@@ -24,7 +24,7 @@ trait Datalake {
   }
 
   lazy val environmentName: String = {
-    Option(System.getProperty(Datalake.SYSTEM_PROPERTY)).getOrElse(Datalake.DEFAULT_ENVIRONMENT)
+    Option(System.getProperty(Datalake.PropertyName)).getOrElse(Datalake.DefaultEnvironment)
   }
 
   def apply(dataUID: DataUID): DataLink = getDataLink(dataUID)

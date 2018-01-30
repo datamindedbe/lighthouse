@@ -1,6 +1,6 @@
 package be.dataminded.lighthouse.common
 
-import java.io.FileNotFoundException
+import java.nio.file.NoSuchFileException
 
 import better.files.File
 import org.scalatest.{FunSuite, Matchers}
@@ -13,7 +13,6 @@ class FileSystemTest extends FunSuite with Matchers {
   }
 
   test("Throws exception when file does not exist") {
-    an[FileNotFoundException] should be thrownBy FileSystem.read("/unknown.csv")
+    an[NoSuchFileException] should be thrownBy FileSystem.read("/unknown.csv")
   }
-
 }

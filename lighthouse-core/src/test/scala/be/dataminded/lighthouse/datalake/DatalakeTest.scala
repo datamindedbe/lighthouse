@@ -9,30 +9,30 @@ class DatalakeTest extends FunSuite with Matchers {
   val datalake = new SampleDatalake()
 
   test("A datalake uses the `test` environment by default") {
-    val dataRef = datalake.getDataLink(datalake.UID)
+    val dataRef = datalake.getDataLink(datalake.uid)
 
     dataRef should equal(datalake.testRef)
   }
 
   test("A datalake can also retrieve properties through it's appy method") {
-    val dataRef = datalake(datalake.UID)
+    val dataRef = datalake(datalake.uid)
 
     dataRef should equal(datalake.testRef)
   }
 
   test("System property allows you to change environment") {
-    System.setProperty(Datalake.SYSTEM_PROPERTY, "acc")
+    System.setProperty(Datalake.PropertyName, "acc")
     val datalake = new SampleDatalake()
 
-    val dataRef = datalake.getDataLink(datalake.UID)
+    val dataRef = datalake.getDataLink(datalake.uid)
 
     dataRef should equal(datalake.accRef)
   }
 
   test("Once a reference is retrieved the environment cannot be changed") {
-    val testRef = datalake.getDataLink(datalake.UID)
-    System.getProperty(Datalake.SYSTEM_PROPERTY, "acc")
-    val accRef = datalake.getDataLink(datalake.UID)
+    val testRef = datalake.getDataLink(datalake.uid)
+    System.getProperty(Datalake.PropertyName, "acc")
+    val accRef = datalake.getDataLink(datalake.uid)
 
     testRef should equal(accRef)
   }
@@ -61,7 +61,7 @@ class DatalakeTest extends FunSuite with Matchers {
   */
 class SampleDatalake(executionDate: LocalDate = LocalDate.now()) extends Datalake {
 
-  val UID         = DataUID("datamined", "key")
+  val uid         = DataUID("datamined", "key")
   val snapshotUID = DataUID("datamined", "snapshotkey")
 
   val testRef = new HiveDataLink("s3://test", table = "test", database = "test")
@@ -72,13 +72,13 @@ class SampleDatalake(executionDate: LocalDate = LocalDate.now()) extends Datalak
   val accSnapshotRef: SnapshotDataLink =
     new HiveDataLink("s3://test", table = "test", database = "test").snapshotOf(executionDate)
 
-  environment(Datalake.DEFAULT_ENVIRONMENT) { references =>
-    references += (UID         -> testRef)
+  environment(Datalake.DefaultEnvironment) { references =>
+    references += (uid         -> testRef)
     references += (snapshotUID -> testSnapshotRef)
   }
 
   environment("acc") { references =>
-    references += (UID         -> accRef)
+    references += (uid         -> accRef)
     references += (snapshotUID -> accSnapshotRef)
   }
 }

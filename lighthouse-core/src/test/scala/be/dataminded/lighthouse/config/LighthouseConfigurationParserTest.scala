@@ -42,12 +42,12 @@ class LighthouseConfigurationParserTest extends FunSuite with Matchers with Befo
   test("When an environment is passed to the configuration, the environment is set as a system property") {
     val config = parser.parse(Seq("-e", "acc"), LighthouseConfiguration())
 
-    System.getProperty(Datalake.SYSTEM_PROPERTY) should equal("acc")
+    System.getProperty(Datalake.PropertyName) should equal("acc")
     config should equal(Some(LighthouseConfiguration(environment = "acc")))
   }
 
   test("When environment is set as a system property, that value is being used") {
-    System.setProperty(Datalake.SYSTEM_PROPERTY, "acc")
+    System.setProperty(Datalake.PropertyName, "acc")
 
     val config = parser.parse(Seq.empty, LighthouseConfiguration())
 
@@ -61,6 +61,6 @@ class LighthouseConfigurationParserTest extends FunSuite with Matchers with Befo
   }
 
   override protected def beforeEach(): Unit = {
-    System.clearProperty(Datalake.SYSTEM_PROPERTY)
+    System.clearProperty(Datalake.PropertyName)
   }
 }

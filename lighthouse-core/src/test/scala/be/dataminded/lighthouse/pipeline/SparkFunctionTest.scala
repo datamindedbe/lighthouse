@@ -136,14 +136,14 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
       // I wrap this in a SparkFunction again because I need the SparkSession to import the implicits
       def countOrdersByCustomer(orders: DataFrame): SparkFunction[DataFrame] = SparkFunction { spark =>
         import spark.implicits._
-        orders.groupBy('CUSTOMER_ID).agg(count('ID).as("COUNT"))
+        orders.groupBy('customerId).agg(count('id).as("count"))
       }
 
       // No need for SparkSession, just a normal function
       def joinCustomersWithOrders(customers: DataFrame, ordersByCustomer: DataFrame): DataFrame = {
         customers
-          .join(ordersByCustomer, ordersByCustomer("CUSTOMER_ID") === customers("ID"))
-          .select(customers("FIRST_NAME"), customers("LAST_NAME"), ordersByCustomer("COUNT"))
+          .join(ordersByCustomer, ordersByCustomer("customerId") === customers("id"))
+          .select(customers("firstName"), customers("lastName"), ordersByCustomer("count"))
       }
 
       val ordersByCustomer = orders.flatMap(countOrdersByCustomer)
@@ -151,7 +151,7 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
       val result = (customers, ordersByCustomer).mapN(joinCustomersWithOrders).run(spark)
 
       val expected = Seq(("Bernard", "Chanson", 5L), ("Ron", "Swanson", 3L), ("Karl", "von Bauchspeck", 2L))
-        .toDF("FIRST_NAME", "LAST_NAME", "COUNT")
+        .toDF("firstName", "lastName", "count")
 
       assertDatasetEquality(result, expected)
     }
