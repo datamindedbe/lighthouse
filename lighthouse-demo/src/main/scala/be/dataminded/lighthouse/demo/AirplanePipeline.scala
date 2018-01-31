@@ -15,17 +15,20 @@ trait AirplanePipeline {
   val dailyWeather: SparkFunction[DataFrame] = Sources
     .fromDataLink(AirplaneDatalake("raw.weather" -> "daily"))
     .flatMap(cleanDailyWeather)
-    .makeSnapshot(SingleFileSink(AirplaneDatalake("clean.weather" -> "daily")))
+    .makeSnapshot(SingleFileSink(AirplaneDatalake("clean" -> "weather")))
 
   val weatherStations: SparkFunction[DataFrame] = Sources
     .fromDataLink(AirplaneDatalake("raw.weather" -> "station"))
     .flatMap(cleanWeatherStations)
-    .makeSnapshot(SingleFileSink(AirplaneDatalake("clean.weather" -> "station")))
+    .makeSnapshot(SingleFileSink(AirplaneDatalake("clean" -> "stations")))
+
+  val weatherWithStations: SparkFunction[DataFrame] = for {
+    weather  <- dailyWeather
+    stations <- weatherStations
+  } yield dailyWeatherWithStation(weather, stations).cache()
 
   val pipeline: SparkFunction[DataFrame] =
-    (airlines, (dailyWeather, weatherStations).mapN(dailyWeatherWithStation).cache())
-      .mapN(buildView)
-      .makeSnapshot(AirplaneDatalake("master.airplane" -> "view"))
+    (airlines, weatherWithStations).mapN(buildView).makeSnapshot(AirplaneDatalake("master" -> "view"))
 
   private def cleanDailyWeather(dailyWeather: DataFrame) = SparkFunction { spark =>
     import spark.implicits._
@@ -40,7 +43,7 @@ trait AirplanePipeline {
       .withColumnRenamed("AvgSpeed", "WAvgSpeed")
   }
 
-  private def cleanWeatherStations(weatherStations: DataFrame) = SparkFunction { spark =>
+  protected def cleanWeatherStations(weatherStations: DataFrame) = SparkFunction { spark =>
     import spark.implicits._
 
     weatherStations.select('WBAN, 'CallSign).withColumnRenamed("CallSign", "IAT").distinct()
