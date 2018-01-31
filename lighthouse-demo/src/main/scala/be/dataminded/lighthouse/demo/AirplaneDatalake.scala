@@ -27,11 +27,12 @@ object AirplaneDatalake extends Datalake {
                                                                                       "inferSchema" -> "true",
                                                                                       "delimiter"   -> "|"))
 
-    refs += DataUID("clean", "airplane")      -> new FileSystemDataLink(file"target/clean/airplane".pathAsString)
-    refs += DataUID("clean.weather", "daily") -> new FileSystemDataLink(file"target/clean/weather/daily".pathAsString)
-    refs += DataUID("clean.weather", "station") -> new FileSystemDataLink(
-      file"target/clean/weather/stations".pathAsString)
-    refs += DataUID("master.airplane", "view") -> new FileSystemDataLink(file"target/master/airplane/view".pathAsString)
+    refs += DataUID("clean", "airplane") -> new FileSystemDataLink(file"target/clean/airplane".pathAsString)
+    refs += DataUID("clean", "weather")  -> new FileSystemDataLink(file"target/clean/weather/daily".pathAsString)
+    refs += DataUID("clean", "stations") -> new FileSystemDataLink(file"target/clean/weather/stations".pathAsString)
+    refs += DataUID("master", "view") -> new HiveDataLink(file"target/master/airplane/view".pathAsString,
+                                                          "default",
+                                                          "airplane_view")
   }
 
   private def resource(path: String): String = File.resource(path).pathAsString
