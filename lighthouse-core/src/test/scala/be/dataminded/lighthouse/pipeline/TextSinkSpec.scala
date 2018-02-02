@@ -12,7 +12,7 @@ class TextSinkSpec extends FunSpec with SharedSparkSession with Matchers with Be
     it("should write the contents of a DataFrame as text") {
       val data = Seq("datadata", "datadatadata").toDF("single")
 
-      SparkFunction.of(data).makeSnapshot(TextSink("./target/output/text")).run(spark)
+      SparkFunction.of(data).write(TextSink("./target/output/text")).run(spark)
 
       ("target" / "output" / "text").glob("*.txt").map(_.contentAsString).toSeq should contain theSameElementsAs Seq(
         "datadata\n",

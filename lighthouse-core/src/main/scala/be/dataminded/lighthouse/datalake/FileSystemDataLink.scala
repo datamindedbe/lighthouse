@@ -17,7 +17,7 @@ class FileSystemDataLink(val path: LazyConfig[String],
                          saveMode: SaveMode = SaveMode.Overwrite,
                          partitionedBy: List[String] = List.empty,
                          options: Map[String, String] = Map.empty)
-    extends PathBasedDataLinkTemplate {
+    extends PathBasedDataLink {
 
   override def doRead(path: String): DataFrame = spark.read.format(format.toString).options(options).load(path)
 

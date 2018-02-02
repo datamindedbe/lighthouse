@@ -15,7 +15,7 @@ trait Datalake {
   type Environment        = Map[DataUID, DataLink]
   type EnvironmentBuilder = mutable.MapBuilder[DataUID, DataLink, Environment]
 
-  private var environments: Map[String, EnvironmentBuilder => EnvironmentBuilder] = Map.empty
+  private val environments: mutable.Map[String, EnvironmentBuilder => EnvironmentBuilder] = mutable.Map.empty
 
   private lazy val currentEnvironment: Environment = {
     environments(environmentName)
@@ -31,7 +31,7 @@ trait Datalake {
 
   def getDataLink(dataUID: DataUID): DataLink = currentEnvironment(dataUID)
 
-  protected def environment(name: String)(f: (EnvironmentBuilder) => EnvironmentBuilder): Unit = {
-    environments = environments.updated(name, f)
-  }
+  protected def environment(name: String)(f: (EnvironmentBuilder) => EnvironmentBuilder): Unit =
+    environments.put(name, f)
+
 }
