@@ -4,11 +4,14 @@ import org.scalatest.Matchers
 
 class SparkFunSuiteTest extends SparkFunSuite with Matchers {
 
-  sparkTest("A SparkTest has an instance of SparkSession available") {
+  test("A SparkTest has an instance of SparkSession available") {
     assertCompiles("spark")
   }
+}
 
-  sparkIntegrationTest("A SparkIntegrationTest has an instance of SparkSession available") {
+class SparkIntegartionFunSuiteTest extends SparkIntegrationFunSuite with Matchers {
+
+  test("A SparkIntegrationTest has an instance of SparkSession available") {
     assertCompiles("spark")
   }
 }
