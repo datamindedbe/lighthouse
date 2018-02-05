@@ -11,7 +11,7 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
   val ordersPath: String   = File.resource("orders.csv").pathAsString
   val options              = Map("header" -> "true")
 
-  sparkTest("A hive data reference can be used to write a dataset") {
+  test("A hive data reference can be used to write a dataset") {
     import spark.implicits._
     val dataset = Seq(Models.RawCustomer("1", "Pascal", "Knapen", "1982")).toDS()
     val ref     = new HiveDataLink(path = "./target/output/orc", database = "default", table = "customer")
@@ -23,7 +23,7 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
     //name = "customer", database = "default", description = null, tableType = "EXTERNAL", isTemporary = false))
   }
 
-  sparkTest("A hive data reference can be used to write a dataframe") {
+  test("A hive data reference can be used to write a dataframe") {
     import spark.implicits._
     val dataset = Seq(Models.RawCustomer("1", "Pascal", "Knapen", "1982")).toDF()
     val ref     = new HiveDataLink(path = "./target/output/orc", database = "default", table = "customer")
