@@ -30,6 +30,7 @@ object AirplaneDatalake extends Datalake {
     refs += DataUID("clean", "airplane") -> new FileSystemDataLink(file"target/clean/airplane".pathAsString)
     refs += DataUID("clean", "weather")  -> new FileSystemDataLink(file"target/clean/weather/daily".pathAsString)
     refs += DataUID("clean", "stations") -> new FileSystemDataLink(file"target/clean/weather/stations".pathAsString)
+
     refs += DataUID("master", "view") -> new HiveDataLink(file"target/master/airplane/view".pathAsString,
                                                           "default",
                                                           "airplane_view")

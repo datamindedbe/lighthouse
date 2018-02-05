@@ -17,18 +17,18 @@ class AirplanePipelineSpec
 
   val result: DataFrame = pipeline.run(spark)
 
-  sparkTest("The pipeline did run correctly and produces output files") {
+  test("The pipeline did run correctly and produces output files") {
     file"target/clean/airplane".glob("*.orc").length should be(1)
     file"target/clean/weather/daily".glob("*.orc").length should be(1)
     file"target/clean/weather/stations".glob("*.orc").length should be(1)
     file"target/master/airplane/view".glob("*.orc").length should not be 0
   }
 
-  sparkTest("The airplane master view is available in Hive") {
+  test("The airplane master view is available in Hive") {
     spark.table("airplane_view").show(5)
   }
 
-  sparkTest("Smaller portions of the pipeline can also be executed for easier testing") {
+  test("Smaller portions of the pipeline can also be executed for easier testing") {
     val cleanWeatherStations = weatherStations.run(spark)
 
     file"target/clean/weather/stations".glob("*.orc").length should be(1)
@@ -38,7 +38,7 @@ class AirplanePipelineSpec
       ))
   }
 
-  sparkTest("Small functions can be tested easier") {
+  test("Small functions can be tested easier") {
     val weatherStations = Seq(
       (3011, "TEX", 37.954, -107.901),
       (3012, "SKX", 36.458, -105.667),
@@ -53,7 +53,7 @@ class AirplanePipelineSpec
       ))
   }
 
-  sparkTest("We can easily test for content using one of the included DatasetComparer") {
+  test("We can easily test for content using one of the included DatasetComparer") {
     val weatherStations = Seq(
       (3011, "TEX", 37.954, -107.901),
       (3012, "SKX", 36.458, -105.667),
