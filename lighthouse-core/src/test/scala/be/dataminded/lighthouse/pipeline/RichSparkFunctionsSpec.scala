@@ -47,6 +47,10 @@ class RichSparkFunctionsSpec extends FunSpec with Matchers with SharedSparkSessi
       function.count().run(spark) should equal(5)
     }
 
+    it("can have columns renamed") {
+      function.renameColumns(Map("value" -> "new_value")).run(spark).columns should equal(Array("new_value"))
+    }
+
     it("can print the schema") {
       val stream = new ByteArrayOutputStream()
       Console.withOut(stream) {

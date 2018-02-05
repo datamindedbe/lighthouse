@@ -1,7 +1,7 @@
 package be.dataminded.lighthouse.pipeline
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.sql.{Dataset, Encoder}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoder}
 import org.apache.spark.storage.StorageLevel
 
 import scala.language.implicitConversions
@@ -28,6 +28,12 @@ object RichSparkFunctions extends LazyLogging {
     def dropCache(): SparkFunction[A] = sparkFunction.map {
       _.unpersist()
     }
+
+    def renameColumns(columnNames: Map[String, String]): SparkFunction[DataFrame] =
+      sparkFunction.map(df =>
+        columnNames.foldLeft(df.toDF()) {
+          case (acc, (existingName, newName)) => acc.withColumnRenamed(existingName, newName)
+      })
 
     def makeSnapshot(sink: Sink): SparkFunction[A] = sparkFunction.map { data =>
       sink.write(data)
