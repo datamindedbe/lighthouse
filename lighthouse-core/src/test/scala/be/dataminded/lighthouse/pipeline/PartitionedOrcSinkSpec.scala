@@ -12,7 +12,7 @@ class PartitionedOrcSinkSpec extends FunSpec with SharedSparkSession with Matche
     it("should write the DataFrame partitioned by a sequence of columns") {
       val data = Seq(("Boy", 15), ("Girl", 22), ("Dog", 3)).toDF("name", "age")
 
-      SparkFunction.of(data).makeSnapshot(PartitionedOrcSink("./target/output/orc", Seq("age"))).run(spark)
+      SparkFunction.of(data).write(PartitionedOrcSink("./target/output/orc", Seq("age"))).run(spark)
 
       ("target" / "output" / "orc").list.filter(_.isDirectory).map(_.name).toList should contain theSameElementsAs Seq(
         "age=22",

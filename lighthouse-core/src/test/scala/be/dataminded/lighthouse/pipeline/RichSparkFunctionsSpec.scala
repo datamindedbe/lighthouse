@@ -25,20 +25,20 @@ class RichSparkFunctionsSpec extends FunSpec with Matchers with SharedSparkSessi
     }
 
     it("can be written to a sink") {
-      function.makeSnapshot(OrcSink("target/output/orc")).run(spark)
+      function.write(OrcSink("target/output/orc")).run(spark)
 
       file"target/output/orc".exists should be(true)
     }
 
     it("can be written to multiple sinks") {
-      function.makeSnapshots(OrcSink("target/output/orc"), OrcSink("target/output/orc2")).run(spark)
+      function.write(OrcSink("target/output/orc"), OrcSink("target/output/orc2")).run(spark)
 
       file"target/output/orc".exists should be(true)
       file"target/output/orc2".exists should be(true)
     }
 
     it("is being cached when writing to multiple sinks for performance") {
-      val result = function.makeSnapshots(OrcSink("target/output/orc"), OrcSink("target/output/orc2")).run(spark)
+      val result = function.write(OrcSink("target/output/orc"), OrcSink("target/output/orc2")).run(spark)
 
       result.storageLevel should equal(StorageLevel.MEMORY_ONLY)
     }

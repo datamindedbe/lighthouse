@@ -7,20 +7,23 @@ import org.apache.spark.sql.functions._
 
 trait AirplanePipeline {
 
-  val airlines: SparkFunction[DataFrame] = Sources
-    .fromDataLink(AirplaneDatalake("raw" -> "airplane"))
-    .flatMap(cleanAirlines)
-    .makeSnapshot(SingleFileSink(AirplaneDatalake("clean" -> "airplane")))
+  val airlines: SparkFunction[DataFrame] =
+    Sources
+      .fromDataLink(AirplaneDatalake("raw" -> "airplane"))
+      .flatMap(cleanAirlines)
+      .write(SingleFileSink(AirplaneDatalake("clean" -> "airplane")))
 
-  val dailyWeather: SparkFunction[DataFrame] = Sources
-    .fromDataLink(AirplaneDatalake("raw.weather" -> "daily"))
-    .flatMap(cleanDailyWeather)
-    .makeSnapshot(SingleFileSink(AirplaneDatalake("clean" -> "weather")))
+  val dailyWeather: SparkFunction[DataFrame] =
+    Sources
+      .fromDataLink(AirplaneDatalake("raw.weather" -> "daily"))
+      .flatMap(cleanDailyWeather)
+      .write(SingleFileSink(AirplaneDatalake("clean" -> "weather")))
 
-  val weatherStations: SparkFunction[DataFrame] = Sources
-    .fromDataLink(AirplaneDatalake("raw.weather" -> "station"))
-    .flatMap(cleanWeatherStations)
-    .makeSnapshot(SingleFileSink(AirplaneDatalake("clean" -> "stations")))
+  val weatherStations: SparkFunction[DataFrame] =
+    Sources
+      .fromDataLink(AirplaneDatalake("raw.weather" -> "station"))
+      .flatMap(cleanWeatherStations)
+      .write(SingleFileSink(AirplaneDatalake("clean" -> "stations")))
 
   val weatherWithStations: SparkFunction[DataFrame] = for {
     weather  <- dailyWeather
@@ -28,18 +31,20 @@ trait AirplanePipeline {
   } yield dailyWeatherWithStation(weather, stations).cache()
 
   val pipeline: SparkFunction[DataFrame] =
-    (airlines, weatherWithStations).mapN(buildView).makeSnapshot(AirplaneDatalake("master" -> "view"))
+    (airlines, weatherWithStations)
+      .mapN(buildView)
+      .write(AirplaneDatalake("master" -> "view"))
 
   private def cleanDailyWeather(dailyWeather: DataFrame) = SparkFunction { spark =>
     import spark.implicits._
 
-    val toCelcius = udf((temp: Int) => ((temp - 32) / 1.8).toInt)
+    val toCelsius = udf((temp: Int) => ((temp - 32) / 1.8).toInt)
 
     dailyWeather
       .select('WBAN, 'YearMonthDay, 'Tmin, 'Tmax, 'Tavg, 'PrecipTotal, 'AvgSpeed)
-      .withColumn("Tmin", toCelcius('Tmin))
-      .withColumn("Tmax", toCelcius('Tmax))
-      .withColumn("Tavg", toCelcius('Tavg))
+      .withColumn("Tmin", toCelsius('Tmin))
+      .withColumn("Tmax", toCelsius('Tmax))
+      .withColumn("Tavg", toCelsius('Tavg))
       .withColumnRenamed("AvgSpeed", "WAvgSpeed")
   }
 

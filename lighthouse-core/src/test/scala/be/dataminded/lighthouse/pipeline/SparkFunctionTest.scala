@@ -164,7 +164,7 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
         .map(PersonTransformations.dedup)
         .flatMap(PersonTransformations.normalize)
         .map(PersonTransformations.returnBase)
-        .makeSnapshot(OrcSink(File.temporaryFile().get().pathAsString))
+        .write(OrcSink(File.temporaryFile().get().pathAsString))
 
       pipeline.run(spark)
     }
@@ -200,8 +200,7 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
       val persons = SparkFunction { spark: SparkSession =>
         import spark.implicits._
         Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
-      }.map(PersonTransformations.dedup)
-        .makeSnapshots(OrcSink("./target/output/orc"), ParquetSink("./target/output/parquet"))
+      }.map(PersonTransformations.dedup).write(OrcSink("./target/output/orc"), ParquetSink("./target/output/parquet"))
 
       persons.run(spark)
 
