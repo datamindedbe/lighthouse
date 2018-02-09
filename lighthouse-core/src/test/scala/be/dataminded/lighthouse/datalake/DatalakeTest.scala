@@ -6,38 +6,43 @@ import org.scalatest.{FunSuite, Matchers}
 
 class DatalakeTest extends FunSuite with Matchers {
 
-  test("A warehouse uses the `test` environment by default") {
-    val warehouse = new SampleDatalake()
-    val dataRef   = warehouse.getDataLink(warehouse.UID)
+  val datalake = new SampleDatalake()
 
-    dataRef should equal(warehouse.testRef)
+  test("A datalake uses the `test` environment by default") {
+    val dataRef = datalake.getDataLink(datalake.uid)
+
+    dataRef should equal(datalake.testRef)
+  }
+
+  test("A datalake can also retrieve properties through it's appy method") {
+    val dataRef = datalake(datalake.uid)
+
+    dataRef should equal(datalake.testRef)
   }
 
   test("System property allows you to change environment") {
-    val warehouse = new SampleDatalake()
-    System.setProperty(Datalake.SYSTEM_PROPERTY, "acc")
-    val dataRef = warehouse.getDataLink(warehouse.UID)
+    System.setProperty(Datalake.PropertyName, "acc")
+    val datalake = new SampleDatalake()
 
-    dataRef should equal(warehouse.accRef)
+    val dataRef = datalake.getDataLink(datalake.uid)
+
+    dataRef should equal(datalake.accRef)
   }
 
   test("Once a reference is retrieved the environment cannot be changed") {
-    val warehouse = new SampleDatalake()
-    val testRef   = warehouse.getDataLink(warehouse.UID)
-    System.getProperty(Datalake.SYSTEM_PROPERTY, "acc")
-    val accRef = warehouse.getDataLink(warehouse.UID)
+    val testRef = datalake.getDataLink(datalake.uid)
+    System.getProperty(Datalake.PropertyName, "acc")
+    val accRef = datalake.getDataLink(datalake.uid)
 
     testRef should equal(accRef)
   }
 
   test("Exception is thrown when requesting an unknown reference") {
-    val warehouse = new SampleDatalake()
-    an[NoSuchElementException] should be thrownBy warehouse.getDataLink(DataUID("datamined", "unknown_key"))
+    an[NoSuchElementException] should be thrownBy datalake.getDataLink(DataUID("datamined", "unknown_key"))
   }
 
   test("Default Execution date is set to today") {
-    val warehouse = new SampleDatalake()
-    val dataRef   = warehouse.getDataLink(warehouse.snapshotUID).asInstanceOf[SnapshotDataLink]
+    val dataRef = datalake.getDataLink(datalake.snapshotUID).asInstanceOf[SnapshotDataLink]
 
     dataRef.date() should equal(LocalDate.now())
   }
@@ -56,7 +61,7 @@ class DatalakeTest extends FunSuite with Matchers {
   */
 class SampleDatalake(executionDate: LocalDate = LocalDate.now()) extends Datalake {
 
-  val UID         = DataUID("datamined", "key")
+  val uid         = DataUID("datamined", "key")
   val snapshotUID = DataUID("datamined", "snapshotkey")
 
   val testRef = new HiveDataLink("s3://test", table = "test", database = "test")
@@ -67,13 +72,13 @@ class SampleDatalake(executionDate: LocalDate = LocalDate.now()) extends Datalak
   val accSnapshotRef: SnapshotDataLink =
     new HiveDataLink("s3://test", table = "test", database = "test").snapshotOf(executionDate)
 
-  environment(Datalake.DEFAULT_ENVIRONMENT) { references =>
-    references += (UID         -> testRef)
+  environment(Datalake.DefaultEnvironment) { references =>
+    references += (uid         -> testRef)
     references += (snapshotUID -> testSnapshotRef)
   }
 
   environment("acc") { references =>
-    references += (UID         -> accRef)
+    references += (uid         -> accRef)
     references += (snapshotUID -> accSnapshotRef)
   }
 }

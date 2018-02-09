@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 import org.apache.spark.sql.{DataFrame, Dataset}
 
-trait PathBasedDataLinkTemplate extends DataLink {
+trait PathBasedDataLink extends DataLink {
 
   val path: LazyConfig[String]
 
@@ -18,11 +18,9 @@ trait PathBasedDataLinkTemplate extends DataLink {
   def doRead(path: String): DataFrame
 
   def doWrite[T](data: Dataset[T], path: String)
-
 }
 
-class SnapshotDataLink(dataLink: PathBasedDataLinkTemplate, val date: LazyConfig[LocalDate])
-    extends PathBasedDataLinkTemplate {
+class SnapshotDataLink(dataLink: PathBasedDataLink, val date: LazyConfig[LocalDate]) extends PathBasedDataLink {
 
   val path: LazyConfig[String] =
     s"${dataLink.path().stripSuffix("/").trim()}/${date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))}"
