@@ -39,6 +39,3 @@ jobs:
             - ~/.sbt
             - ~/.coursier
             - ~/.ivy2
-      - run:
-          name: Publish artifacts to repository
-          command: sbt publish
