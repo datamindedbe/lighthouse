@@ -25,12 +25,12 @@ If you are using Maven, add this to your `pom.xml`:
 ```xml
 <dependency>
     <groupId>be.dataminded</groupId>
-    <artifactId>lighthouse</artifactId>
+    <artifactId>lighthouse_2.11</artifactId>
     <version>[version]</version>
 </dependency>
 <dependency>
     <groupId>be.dataminded</groupId>
-    <artifactId>lighthouse-testing</artifactId>
+    <artifactId>lighthouse-testing_2.11</artifactId>
     <version>[version]</version>
     <scope>test</scope>
 </dependency>
