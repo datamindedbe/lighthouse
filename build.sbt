@@ -9,7 +9,7 @@ lazy val buildSettings = Seq(
   scalafmtOnCompile := true,
   // Memory settings to be able to test with Spark
   Test / fork := true,
- Test / testOptions += Tests.Argument("-oD"),
+  Test / testOptions += Tests.Argument("-oD"),
   javaOptions ++= Seq(
     "-Xms768M",
     "-Xmx2048M",
@@ -25,8 +25,9 @@ lazy val buildSettings = Seq(
   // Publish like Maven
   publishMavenStyle := true,
   publishTo := Some(if (isSnapshot.value) sonatypeSnapshots else sonatypeStaging),
-  homepage := Some(url("https://lighthouse.dataminded.be")),
-  scmInfo := Some(ScmInfo(url("https://github.com/dataminded/lighthouse"), "git@github.com:dataminded/lighthouse.git")),
+  homepage := Some(url("https://github.com/datamindedbe/lighthouse")),
+  scmInfo := Some(
+    ScmInfo(url("https://github.com/datamindedbe/lighthouse"), "git@github.com:datamindedbe/lighthouse.git")),
   developers := List(
     Developer("mlavaert", "Mathias Lavaert", "mathias.lavaert@dataminded.be", url("https://github.com/mlavaert"))),
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
@@ -45,5 +46,5 @@ lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
   .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles))
 
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
-  .dependsOn(`lighthouse-core` , `lighthouse-testing` % "test->compile")
+  .dependsOn(`lighthouse-core`, `lighthouse-testing` % "test->compile")
   .settings(buildSettings, libraryDependencies ++= commonDependencies)
