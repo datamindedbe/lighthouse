@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
 
-  private lazy val amazonSdkVersion = "1.11.270"
+  private lazy val amazonSdkVersion = "1.11.238"
   private lazy val sparkVersion     = "2.2.1"
 
   lazy val sparkCore = "org.apache.spark" %% "spark-core"  % sparkVersion % Provided
@@ -18,13 +18,19 @@ object Dependencies {
   lazy val cats        = "org.typelevel"        %% "cats-core"    % "1.0.1"
   lazy val betterFiles = "com.github.pathikrit" %% "better-files" % "3.4.0"
 
-  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4"
+  lazy val scalaTest        = "org.scalatest" %% "scalatest" % "3.0.4"
+  lazy val h2               = "com.h2database" % "h2" % "1.4.196" % Test
+  lazy val testDependencies = Seq(scalaTest % Test, h2)
 
-  // AWS library dependencies
-  lazy val amazonSdkS3  = "com.amazonaws" % "aws-java-sdk-s3"  % amazonSdkVersion
-  lazy val amazonSdkSSM = "com.amazonaws" % "aws-java-sdk-ssm" % amazonSdkVersion
+  // Database connectivity
+  lazy val scalikejdbc = "org.scalikejdbc" %% "scalikejdbc" % "3.2.0"
 
-  lazy val commonDependencies = Seq(sparkCore, sparkSql, sparkHive, scopt, betterFiles, scalaLogging, scalaTest % Test)
+  // Amazon AWS
+  lazy val awsSdkS3  = "com.amazonaws" % "aws-java-sdk-s3" % amazonSdkVersion
+  lazy val awsSdkSsm = "com.amazonaws" % "aws-java-sdk-ssm" % amazonSdkVersion
+  lazy val amazonSdk = Seq(awsSdkS3, awsSdkSsm)
 
-  lazy val amazonSdk = Seq(amazonSdkS3, amazonSdkSSM)
+  lazy val commonDependencies: Seq[ModuleID] =
+    Seq(sparkCore, sparkSql, sparkHive, scopt, betterFiles, scalaLogging, scalikejdbc) ++ amazonSdk ++ testDependencies
+
 }

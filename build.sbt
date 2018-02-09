@@ -8,7 +8,7 @@ lazy val buildSettings = Seq(
   scalafmtOnCompile := true,
   // Memory settings to be able to test with Spark
   Test / fork := true,
- Test / testOptions += Tests.Argument("-oD"),
+  Test / testOptions += Tests.Argument("-oD"),
   javaOptions ++= Seq(
     "-Xms768M",
     "-Xmx2048M",
@@ -41,11 +41,15 @@ lazy val `lighthouse-platform` = (project in file("."))
 
 lazy val `lighthouse-core` = (project in file("lighthouse-core"))
   .dependsOn(`lighthouse-testing` % "test->compile")
-  .settings(buildSettings, libraryDependencies ++= commonDependencies ++ amazonSdk ++ Seq(cats, typesafeConfig))
+  .settings(
+    buildSettings,
+    libraryDependencies ++= commonDependencies,
+    libraryDependencies ++= Seq(cats, typesafeConfig),
+  )
 
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
   .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles))
 
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
-  .dependsOn(`lighthouse-core` , `lighthouse-testing` % "test->compile")
+  .dependsOn(`lighthouse-core`, `lighthouse-testing` % "test->compile")
   .settings(buildSettings, libraryDependencies ++= commonDependencies)

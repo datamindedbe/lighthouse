@@ -2,6 +2,7 @@ package be.dataminded.lighthouse.datalake
 
 import java.sql.{DriverManager, SQLException}
 
+import be.dataminded.lighthouse.common.Database
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
 import scala.language.implicitConversions
@@ -90,14 +91,9 @@ class JdbcDataLink(url: LazyConfig[String],
   private case class Boundaries(min: Long, max: Long, count: Long)
 
   // The returns the minimum, maximum (and total) count of the partitionColumn
-  private def getBoundaries(partitions: Int = numberOfPartitions()): Try[Boundaries] = {
-    Try {
-      // Do this to make sure driver is loaded
-      Class.forName(driver())
-
-      // Prepare database query statement
-      val connection = DriverManager.getConnection(connectionProperties("url"), connectionProperties)
-      val statement  = connection.createStatement()
+  private def getBoundaries(partitions: Int = numberOfPartitions()): Try[Boundaries] = Try {
+    Database(driver(), connectionProperties("url"), connectionProperties).withConnection { connection =>
+      val statement = connection.createStatement()
 
       // Only perform count when partitions are not set
       val query = partitions match {
@@ -106,20 +102,17 @@ class JdbcDataLink(url: LazyConfig[String],
         case p if p > 0 => s"select min(${partitionColumn()}) as min, max(${partitionColumn()}) as max from ${table()}"
       }
 
-      // Make sure that connection is closed when an exception is thrown
-      try {
-        // Execute query, and parse based on whether we need to take count into account
-        val result = (partitions, statement.execute(query), statement.getResultSet.first) match {
-          case (p, true, true) if p == 0 =>
-            Boundaries(statement.getResultSet.getInt("min"),
-                       statement.getResultSet.getInt("max"),
-                       statement.getResultSet.getInt("count"))
-          case (p, true, true) if p > 0 =>
-            Boundaries(statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"), 0)
-          case _ => throw new SQLException("Min, max and count value could not be retrieved")
-        }
-        result
-      } finally connection.close()
+      // Execute query, and parse based on whether we need to take count into account
+      val result = (partitions, statement.execute(query), statement.getResultSet.next) match {
+        case (p, true, true) if p == 0 =>
+          Boundaries(statement.getResultSet.getInt("min"),
+                     statement.getResultSet.getInt("max"),
+                     statement.getResultSet.getInt("count"))
+        case (p, true, true) if p > 0 =>
+          Boundaries(statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"), 0)
+        case _ => throw new SQLException("Min, max and count value could not be retrieved")
+      }
+      result
     }
   }
 
