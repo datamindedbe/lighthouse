@@ -26,7 +26,7 @@ class JdbcDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterAl
 
   val extraOptions = Map("MODE" -> "MYSQL")
 
-  sparkTest("Reading JDBC datalink") {
+  test("Reading JDBC datalink") {
     import spark.implicits._
 
     val jdbcDataLink = new JdbcDataLink(
@@ -42,7 +42,7 @@ class JdbcDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterAl
     data.collect() should contain theSameElementsAs (0 until 100).map(x => test_table(x, s"$x"))
   }
 
-  sparkTest("Append JDBC datalink") {
+  test("Append JDBC datalink") {
     import spark.implicits._
 
     val jdbcDataLink = new JdbcDataLink(
@@ -63,7 +63,7 @@ class JdbcDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterAl
       (100 until 200).map(x => test_table(x, s"$x"))
   }
 
-  sparkTest("Overwrite JDBC datalink") {
+  test("Overwrite JDBC datalink") {
     import spark.implicits._
 
     val jdbcDataLink = new JdbcDataLink(
