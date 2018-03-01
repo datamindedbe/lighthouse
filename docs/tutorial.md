@@ -61,3 +61,30 @@ Finally, we are ready to define a simple test environment with that one data sou
  }
 ```
 Congratulations, you have built your first data lake. It has one environment: `test`, which contains one `DataLink`: a csv file loaded from your local disk. You cataloged that data to be in the `raw` zone of your data lake and it is named `airplane`. 
+
+Let's extend this with two weather sources, in a similar fashion:
+
+```scala
+ environment("test") { refs =>
+    refs += DataUID("raw", "airplane") -> new FileSystemDataLink(
+      resource("data/airplane"),
+      Csv,
+      SaveMode.ErrorIfExists,
+      options = Map("header" -> "true", "inferSchema" -> "true"))
+      
+    refs += DataUID("raw.weather", "daily") -> new FileSystemDataLink(
+        resource("data/weather/daily"),
+        Csv,
+        SaveMode.ErrorIfExists,
+        options = Map("header" -> "true", "inferSchema" -> "true"))
+    
+    refs += DataUID("raw.weather", "station") -> new FileSystemDataLink(
+        resource("data/weather/station"),
+        Csv,
+        SaveMode.ErrorIfExists,
+        options = Map(
+          "header" -> "true", 
+          "inferSchema" -> "true", 
+          "delimiter"   -> "|"))
+ }
+```
