@@ -22,7 +22,7 @@ Start by adding the Lighthouse dependency to your project. In case you are using
 or sbt:
 
 ```scala
-libraryDependencies += "be.dataminded" % "lighthouse_2.11" % "0.2.0"
+libraryDependencies += "be.dataminded" % "lighthouse" %% "0.2.0"
 ```
 You can also manually clone and build Lighthouse. You can get the repo here:
 ```
@@ -35,7 +35,7 @@ A data lake is a collection of different data sources that we bring together in 
 You need three things to define a data source:
  1. **DataLink**: This is a pointer to where the data is stored. More often than not, it's a link to the file system on which you store your data lake (local file system, AWS S3, Azure Blob Storage, Google Cloud Storage, ...). But it could also be a `JDBCDataLink`, connecting to a SQL database. We'll discuss later all the options available.
  2. **DataUID**: This uniquely identifies a data source in the data lake. A `DataUID` has 2 parameters: a `namespace` and a `key`. You can think of the namespace as the zone of your data lake where this data belongs, and the key as the actual name of the `DataLink`. How you structure your data lake in zones, is out-of-scope for this tutorial. 
- 3. **Environment**: Your local development environment will (hopefully) look different from your production environment. In Lighthouse, you can define several environments and add a `DataLink` to one or more environments, depending on your needs. Since all this configuration is code, you can be very flexible in bringing together `DataLinks`, `DataUIDs` and `environments`. 
+ 3. **Environment**: Your local development environment will (hopefully) look different from your production environment. In Lighthouse, you can define several environments and add a `DataLink` to one or more environments, depending on your needs. Since all this configuration is code, you can be very flexible in bringing together `DataLinks`, `DataUIDs` and `environments`. Usually, you have a local `dev` or `test` environment, an `acceptance` environment and a `prod` environment. The local environment can be run from your laptop, while the `acceptance` and `prod` environments can run in the cloud. 
  
 Let's begin with defining some of those data sources. The biggest one is the airplane data itself. For this simple tutorial we define a `FileSystemDataLink` to the folder where we stored the file locally, as such:
 
@@ -156,7 +156,7 @@ We'll add cleaning steps for the other two data sources, as such:
       .write(SingleFileSink(AirplaneDatalake("clean" -> "stations")))
 ```
 
-Of course, we also add the two cleaned data sources to the data lake:
+Now we also need to add the two cleaned data sources to the data lake, because you're referencing them above:
 ```scala
 refs += DataUID("clean", "weather")  -> 
   new FileSystemDataLink(file"target/clean/weather/daily".pathAsString)
@@ -164,7 +164,7 @@ refs += DataUID("clean", "stations") ->
   new FileSystemDataLink(file"target/clean/weather/stations".pathAsString)
 ```
 
-The actual implementation of the cleaning functions, you can find in the code base of Lighthouse, and don't really matter for this demo. What is cool, however, is that now we can reuse those clean data sources everywhere. Let's build a single view for instance. First we join both weather data sources:
+The actual implementation of the cleaning functions, you can find in the code base of Lighthouse, and don't really matter for this demo. What is cool however, is that now we can reuse those clean data sources everywhere. Let's build a single view for instance. First we join both weather data sources:
 
 ```scala
   val weatherWithStations: SparkFunction[DataFrame] = for {
@@ -215,7 +215,7 @@ Next, we combine this with the original airline data and we finally write it bac
       }
 ```
 
-For that to work, we need to add the `master -> view` object to the data lake definition:
+For this to work, we need to add the `master -> view` object to the data lake definition:
 
 
 ```scala
@@ -224,8 +224,8 @@ For that to work, we need to add the `master -> view` object to the data lake de
       "default",
       "airplane_view")
 ```
-Note that, this time, we made it a `HiveDataLink` and we store it in the table `airplane_view` of the database `default`. That means that any consumer downstream, such as a data science process that tries to predict delays based on this integrated airline data, can simply read it from Hive. 
+Note that this time, we made it a `HiveDataLink` and we store it in the table `airplane_view` of the database `default`. That means that any consumer downstream, such as a data science process that tries to predict delays based on this integrated airline data, can simply read it from Hive. 
 
  
 ### Demo
-You can find the full source code of this example in the `lighthouse-demo` folder of the Lighthouse repository. Unit tests are available to show how each aspect is supposed to work, on your own machine. As Lighthouse is just a Spark library, you can deploy it in your normal deployment pipeline, you cen include it in your jar, and simply submit Spark jobs to your cluster. 
+You can find the full source code of this example in the `lighthouse-demo` folder of the Lighthouse repository. [Unit tests](https://github.com/datamindedbe/lighthouse/tree/master/lighthouse-core/src/test) are available to show how each aspect is supposed to work, on your own machine. As Lighthouse is just a Spark library, you can deploy it in your normal deployment pipeline, you cen include it in your jar, and simply submit Spark jobs to your cluster. 
