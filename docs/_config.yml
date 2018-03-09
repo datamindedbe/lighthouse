@@ -17,8 +17,8 @@ title: Lighthouse
 email: lighthouse@dataminded.be
 description: >-
   Lighthouse is an open-source project to build and manage data lakes.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://dataminded.be" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: /lighthouse
+url: https://datamindedbe.github.io
 twitter_username: datamindedbe
 github_username:  datamindedbe
 
