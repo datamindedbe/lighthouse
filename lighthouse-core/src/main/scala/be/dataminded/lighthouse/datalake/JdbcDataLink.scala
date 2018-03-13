@@ -9,21 +9,21 @@ import scala.util.{Failure, Success, Try}
 /**
   * Default JDBC DataRef implementation for reading and writing to a JDBC database
   *
-  * @param url Function returning the URL of the database you want to connect to. Should be in the following format
-  *            jdbc:mysql://${jdbcHostname}:${jdbcPort}/${jdbcDatabase}
-  * @param username Function returning the Username of the database you want to connect to
-  * @param password Function returning the Password of the database you want to connect to
-  * @param driver Function returning the Driver to use for the database you want to connect to, should be available in
-  *               the classpath
-  * @param table Function returning the Table of the database where you would like to write to.
-  * @param extraProperties Additional properties to use to connect to the database
-  * @param partitionColumn The column where you want to partition your data for, should contain an Integer type
+  * @param url                Function returning the URL of the database you want to connect to. Should be in the following format
+  *                           jdbc:mysql://${jdbcHostname}:${jdbcPort}/${jdbcDatabase}
+  * @param username           Function returning the Username of the database you want to connect to
+  * @param password           Function returning the Password of the database you want to connect to
+  * @param driver             Function returning the Driver to use for the database you want to connect to, should be available in
+  *                           the classpath
+  * @param table              Function returning the Table of the database where you would like to write to.
+  * @param extraProperties    Additional properties to use to connect to the database
+  * @param partitionColumn    The column where you want to partition your data for, should contain an Integer type
   * @param numberOfPartitions Amount of partitions you want to use for reading or writing your data. If value is 0 then
   *                           batchSize is taken to decide the number of partitions. If both numberOfPartitions and
   *                           batchSize is not 0, numberOfPartitions takes preference
-  * @param batchSize The amount of rows that you want to retrieve in one partition. If value is 0 number of partitions
-  *                  is taken to decide the batch size
-  * @param saveMode Spark sql SaveMode
+  * @param batchSize          The amount of rows that you want to retrieve in one partition. If value is 0 number of partitions
+  *                           is taken to decide the batch size
+  * @param saveMode           Spark sql SaveMode
   */
 class JdbcDataLink(url: LazyConfig[String],
                    username: LazyConfig[String],
@@ -107,11 +107,17 @@ class JdbcDataLink(url: LazyConfig[String],
         // Execute query, and parse based on whether we need to take count into account
         val result = (partitions, statement.execute(query), statement.getResultSet.next) match {
           case (p, true, true) if p == 0 =>
-            Boundaries(statement.getResultSet.getInt("min"),
-                       statement.getResultSet.getInt("max"),
-                       statement.getResultSet.getInt("count"))
+            Boundaries(
+              statement.getResultSet.getBigDecimal("min").longValueExact(),
+              statement.getResultSet.getBigDecimal("max").longValueExact(),
+              statement.getResultSet.getBigDecimal("count").longValueExact()
+            )
           case (p, true, true) if p > 0 =>
-            Boundaries(statement.getResultSet.getInt("min"), statement.getResultSet.getInt("max"), 0)
+            Boundaries(
+              statement.getResultSet.getBigDecimal("min").longValueExact(),
+              statement.getResultSet.getBigDecimal("max").longValueExact(),
+              0
+            )
           case _ => throw new IllegalStateException("Min, max and count value could not be retrieved")
         }
         result
