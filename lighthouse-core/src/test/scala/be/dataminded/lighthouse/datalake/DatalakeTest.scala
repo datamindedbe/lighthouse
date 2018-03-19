@@ -2,11 +2,12 @@ package be.dataminded.lighthouse.datalake
 
 import java.time.{LocalDate, Month}
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{FunSuite, Matchers, PrivateMethodTester}
 
-class DatalakeTest extends FunSuite with Matchers {
+class DatalakeTest extends FunSuite with Matchers with PrivateMethodTester {
 
   val datalake = new SampleDatalake()
+
 
   test("A datalake uses the `test` environment by default") {
     val dataRef = datalake.getDataLink(datalake.uid)
@@ -53,6 +54,12 @@ class DatalakeTest extends FunSuite with Matchers {
     val dataRef   = warehouse.getDataLink(warehouse.snapshotUID).asInstanceOf[SnapshotDataLink]
 
     dataRef.date() should equal(date)
+  }
+
+  test("A datalake immediatly initializes it's current environment") {
+    val enabledEnvironment = datalake.currentEnvironment
+
+    enabledEnvironment should not be empty
   }
 }
 
