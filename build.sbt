@@ -1,6 +1,6 @@
 import Dependencies._
-import Opts.resolver.sonatypeSnapshots
 import Opts.resolver.sonatypeStaging
+import Resolvers._
 
 lazy val buildSettings = Seq(
   organization := "be.dataminded",
@@ -24,7 +24,7 @@ lazy val buildSettings = Seq(
   git.baseVersion := "0.0.0",
   // Publish like Maven
   publishMavenStyle := true,
-  publishTo := Some(if (isSnapshot.value) sonatypeSnapshots else sonatypeStaging),
+  publishTo := Some(if (isSnapshot.value) datamindedSnapshots else sonatypeStaging),
   homepage := Some(url("https://github.com/datamindedbe/lighthouse")),
   scmInfo := Some(
     ScmInfo(url("https://github.com/datamindedbe/lighthouse"), "git@github.com:datamindedbe/lighthouse.git")),
@@ -40,6 +40,7 @@ lazy val `lighthouse-platform` = (project in file("."))
 
 lazy val lighthouse = (project in file("lighthouse-core"))
   .dependsOn(`lighthouse-testing` % "test->compile")
+  .enablePlugins(SiteScaladocPlugin)
   .settings(buildSettings, libraryDependencies ++= commonDependencies ++ Seq(cats, typesafeConfig))
 
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))

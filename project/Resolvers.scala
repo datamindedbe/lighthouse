@@ -4,6 +4,5 @@ object Resolvers {
 
   private val `dataminded-artifacts` = "s3://s3-eu-west-1.amazonaws.com/dataminded-artifacts/maven"
 
-  lazy val datamindedReleases  = "dataminded-releases" at s"${`dataminded-artifacts`}/release"
   lazy val datamindedSnapshots = "dataminded-releases" at s"${`dataminded-artifacts`}/snapshot"
 }
