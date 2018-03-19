@@ -12,26 +12,37 @@ object Datalake {
   */
 trait Datalake {
 
+  import Datalake._
+
   type Environment        = Map[DataUID, DataLink]
   type EnvironmentBuilder = mutable.MapBuilder[DataUID, DataLink, Environment]
 
-  private val environments: mutable.Map[String, EnvironmentBuilder => EnvironmentBuilder] = mutable.Map.empty
+  private var enabledEnvironment: Environment = _
 
-  private lazy val currentEnvironment: Environment = {
-    environments(environmentName)
-      .apply(new mutable.MapBuilder[DataUID, DataLink, Environment](Map.empty))
-      .result()
-  }
+  def currentEnvironment: Environment = enabledEnvironment
 
-  lazy val environmentName: String = {
-    Option(System.getProperty(Datalake.PropertyName)).getOrElse(Datalake.DefaultEnvironment)
+  /**
+    * The current environment that is enabled.
+    */
+  val environmentName: String = {
+    Option(System.getProperty(PropertyName)).getOrElse(DefaultEnvironment)
   }
 
   def apply(dataUID: DataUID): DataLink = getDataLink(dataUID)
 
-  def getDataLink(dataUID: DataUID): DataLink = currentEnvironment(dataUID)
+  /**
+    * Retrieve a [[DataLink]] from the [[Datalake]] object. If there is no [[DataLink]] configured with the given
+    * [[DataUID]] a [[NoSuchElementException]] will be thrown
+    *
+    * @param dataUID The [[DataUID]]-identifier for which to retrieve a `DataLink`
+    * @return The DataLink that matches the given [[DataUID]]
+    */
+  def getDataLink(dataUID: DataUID): DataLink = enabledEnvironment(dataUID)
 
-  protected def environment(name: String)(f: (EnvironmentBuilder) => EnvironmentBuilder): Unit =
-    environments.put(name, f)
+  protected def environment(name: String)(f: (EnvironmentBuilder) => EnvironmentBuilder): Unit = name match {
+    case envName if envName == environmentName => enabledEnvironment = f(newEmptyEnvironment()).result()
+    case _                                     =>
+  }
 
+  private def newEmptyEnvironment() = new mutable.MapBuilder[DataUID, DataLink, Environment](Map.empty)
 }
