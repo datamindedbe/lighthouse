@@ -26,8 +26,8 @@ object Dependencies {
   lazy val scalikejdbc = "org.scalikejdbc" %% "scalikejdbc" % "3.2.1"
 
   // Amazon AWS
-  lazy val awsSdkS3  = "com.amazonaws" % "aws-java-sdk-s3" % amazonSdkVersion
-  lazy val awsSdkSsm = "com.amazonaws" % "aws-java-sdk-ssm" % amazonSdkVersion
+  lazy val awsSdkS3  = "com.amazonaws" % "aws-java-sdk-s3" % amazonSdkVersion % Provided
+  lazy val awsSdkSsm = "com.amazonaws" % "aws-java-sdk-ssm" % amazonSdkVersion % Provided
   lazy val amazonSdk = Seq(awsSdkS3, awsSdkSsm)
 
   lazy val commonDependencies: Seq[ModuleID] =
