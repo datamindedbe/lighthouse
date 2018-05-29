@@ -7,6 +7,7 @@ import be.dataminded.lighthouse.Models
 import be.dataminded.lighthouse.spark.Csv
 import be.dataminded.lighthouse.testing.SparkFunSuite
 import better.files._
+import org.apache.spark.sql.types._
 import org.scalatest.{BeforeAndAfter, Matchers}
 
 class FileSystemDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
@@ -27,6 +28,19 @@ class FileSystemDataLinkTest extends SparkFunSuite with Matchers with BeforeAndA
     val dataset = link.readAs[Models.RawCustomer]()
 
     dataset.count should equal(3)
+  }
+
+  test("A FileSystemDataLink can leverage a specified schema") {
+    val schema = Option(
+      StructType(
+        StructField("id", ByteType) ::
+          StructField("firstName", StringType, nullable = true) ::
+          StructField("lastName", StringType, nullable = true) ::
+          StructField("yearOfBirth", ShortType, nullable = true) :: Nil))
+    val link    = new FileSystemDataLink(path = customerPath, format = Csv, options = options, schema = schema)
+    val dataset = link.read()
+
+    dataset.schema should equal(schema.get)
   }
 
   test("A FileSystemDataLink can be used to write a DataFrame") {
