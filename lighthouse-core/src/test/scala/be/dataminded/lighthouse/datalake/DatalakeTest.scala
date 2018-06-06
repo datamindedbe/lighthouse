@@ -14,7 +14,7 @@ class DatalakeTest extends FunSuite with Matchers {
     dataRef should equal(datalake.testRef)
   }
 
-  test("A datalake can also retrieve properties through it's appy method") {
+  test("A datalake can retrieve properties through its apply method") {
     val dataRef = datalake(datalake.uid)
 
     dataRef should equal(datalake.testRef)
