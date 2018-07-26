@@ -8,7 +8,6 @@ class DatalakeTest extends FunSuite with Matchers with PrivateMethodTester {
 
   val datalake = new SampleDatalake()
 
-
   test("A datalake uses the `test` environment by default") {
     val dataRef = datalake.getDataLink(datalake.uid)
 

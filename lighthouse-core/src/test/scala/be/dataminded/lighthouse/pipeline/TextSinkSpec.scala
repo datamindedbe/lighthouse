@@ -1,7 +1,7 @@
 package be.dataminded.lighthouse.pipeline
 
-import better.files._
 import be.dataminded.lighthouse.testing.SharedSparkSession
+import better.files._
 import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
 
 class TextSinkSpec extends FunSpec with SharedSparkSession with Matchers with BeforeAndAfterEach {

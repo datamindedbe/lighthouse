@@ -1,6 +1,6 @@
 import Dependencies._
-import Opts.resolver.sonatypeStaging
 import Resolvers._
+import sbt.Opts.resolver.sonatypeStaging
 
 lazy val buildSettings = Seq(
   organization := "be.dataminded",

@@ -17,4 +17,3 @@ case object Csv extends SparkFileFormat { val name = "csv" }
 case object Json extends SparkFileFormat { val name = "json" }
 
 case object Text extends SparkFileFormat { val name = "text" }
-

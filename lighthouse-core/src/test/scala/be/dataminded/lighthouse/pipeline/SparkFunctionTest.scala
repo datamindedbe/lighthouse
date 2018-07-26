@@ -1,11 +1,10 @@
 package be.dataminded.lighthouse.pipeline
 
-import be.dataminded.lighthouse.testing.{DatasetComparer, SharedSparkSession}
 import be.dataminded.lighthouse.Models._
+import be.dataminded.lighthouse.testing.{DatasetComparer, SharedSparkSession}
 import better.files._
-import cats.implicits._
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions.count
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
 
 class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession with DatasetComparer with BeforeAndAfter {
