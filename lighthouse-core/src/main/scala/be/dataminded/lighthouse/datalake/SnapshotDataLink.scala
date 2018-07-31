@@ -5,9 +5,9 @@ import java.time.format.DateTimeFormatter
 
 import org.apache.spark.sql.{DataFrame, Dataset}
 
-class SnapshotDataLink(dataLink: PathBasedDataLink, val date: LazyConfig[LocalDate]) extends PathBasedDataLink {
+class SnapshotDataLink(dataLink: PathBasedDataLink, val date: LazyConfig[LocalDate], val pathSuffix: String) extends PathBasedDataLink {
   val path: LazyConfig[String] =
-    s"${dataLink.path().trim().stripSuffix("/")}/${date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))}"
+    s"${dataLink.path().trim().stripSuffix("/")}/${date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))}/${pathSuffix}"
 
   override def doRead(path: String): DataFrame = dataLink.doRead(path)
 
