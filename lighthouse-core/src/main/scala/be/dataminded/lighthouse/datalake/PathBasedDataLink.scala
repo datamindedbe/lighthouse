@@ -7,7 +7,7 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 trait PathBasedDataLink extends DataLink {
   val path: LazyConfig[String]
 
-  def snapshotOf(date: LazyConfig[LocalDate]): SnapshotDataLink = new SnapshotDataLink(this, date)
+  def snapshotOf(date: LazyConfig[LocalDate], pathSuffix: String = ""): SnapshotDataLink = new SnapshotDataLink(this, date, pathSuffix)
 
   def partitionOf(partition: LazyConfig[String]): PartitionedDataLink = new PartitionedDataLink(this, partition)
 
@@ -17,5 +17,5 @@ trait PathBasedDataLink extends DataLink {
 
   def doRead(path: String): DataFrame
 
-  def doWrite[T](data: Dataset[T], path: String)
+  def doWrite[T](data: Dataset[T], path: String
 }
