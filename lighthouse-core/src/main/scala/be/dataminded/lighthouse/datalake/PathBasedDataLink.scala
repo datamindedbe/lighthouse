@@ -7,7 +7,7 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 trait PathBasedDataLink extends DataLink {
   val path: LazyConfig[String]
 
-  def snapshotOf(date: LazyConfig[LocalDate], pathSuffix: String = ""): SnapshotDataLink =
+  def snapshotOf(date: LazyConfig[LocalDate], pathSuffix: Option[String] = None): SnapshotDataLink =
     new SnapshotDataLink(this, date, pathSuffix)
 
   def partitionOf(partition: LazyConfig[String]): PartitionedDataLink = new PartitionedDataLink(this, partition)
