@@ -10,5 +10,5 @@ class NullDataLink extends DataLink {
 
   def read(): DataFrame = spark.createDataFrame(Seq())
 
-  def write[T](dataset: Dataset[T]): Unit = Unit
+  def write[T](dataset: Dataset[T]): Unit = ()
 }

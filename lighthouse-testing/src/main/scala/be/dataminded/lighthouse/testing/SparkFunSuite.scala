@@ -10,7 +10,7 @@ case object SparkIntegrationTest extends Tag("be.dataminded.lighthouse.testing.S
   */
 class SparkFunSuite extends FunSuite with SharedSparkSession {
 
-  def test(name: String)(body: => Unit): Unit = {
+  def test(name: String)(body: => Any /* Assertion */ ): Unit = {
     test(name, SparkTest) {
       body
     }
@@ -19,7 +19,7 @@ class SparkFunSuite extends FunSuite with SharedSparkSession {
 
 class SparkIntegrationFunSuite extends FunSuite with SharedSparkSession {
 
-  def test(name: String)(body: => Unit): Unit = {
+  def test(name: String)(body: => Any /* Assertion */ ): Unit = {
     test(name, SparkIntegrationTest) {
       body
     }

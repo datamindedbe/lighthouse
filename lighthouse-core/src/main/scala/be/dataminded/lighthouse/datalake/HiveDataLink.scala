@@ -22,7 +22,7 @@ class HiveDataLink(val path: LazyConfig[String],
                    table: LazyConfig[String],
                    format: SparkFileFormat = Orc,
                    saveMode: SaveMode = SaveMode.Overwrite,
-                   partitionedBy: List[String] = List.empty,
+                   partitionedBy: List[String] = Nil,
                    overwriteBehavior: SparkOverwriteBehavior = FullOverwrite,
                    options: Map[String, String] = Map.empty)
     extends PathBasedDataLink {
@@ -62,7 +62,9 @@ class HiveDataLink(val path: LazyConfig[String],
             .save(path)
 
           // Update partition information based on
-          spark.sql(s"ALTER TABLE ${table()} RECOVER PARTITIONS")
+          spark
+            .sql(s"ALTER TABLE ${table()} RECOVER PARTITIONS")
+            .foreach(_ => ()) // execute DataFrame
         }
 
       // In any other case use default spark write behavior
