@@ -70,17 +70,19 @@ Where do you store all the data? This is a big decision and it depends on what's
 Most organisations are moving away from on-premise big data clusters, towards cloud technologies. Some popular options are [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/) and [Google Cloud Storage](https://cloud.google.com/storage/). 
 
 
-### Processing
-
-#### Complex analytics
-#### Dashboarding
-#### Data exploration
-#### Processing technologies
+### Processing technologies
+TODO: Complete this section 
 
 ### Data ingestion
-### Workflow management
-### Security
-### Interface with the outside world
+TODO: Complete this section
 
+### Workflow management
+TODO: Complete this section
+
+### Security
+TODO: Complete this section
+
+### Interface with the outside world
+TODO: Complete this section
 
   
