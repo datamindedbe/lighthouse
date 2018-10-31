@@ -39,7 +39,7 @@ trait Datalake {
     */
   def getDataLink(dataUID: DataUID): DataLink = enabledEnvironment(dataUID)
 
-  protected def environment(name: String)(f: (EnvironmentBuilder) => EnvironmentBuilder): Unit = name match {
+  protected def environment(name: String)(f: EnvironmentBuilder => EnvironmentBuilder): Unit = name match {
     case envName if envName == environmentName => enabledEnvironment = f(newEmptyEnvironment()).result()
     case _                                     =>
   }
