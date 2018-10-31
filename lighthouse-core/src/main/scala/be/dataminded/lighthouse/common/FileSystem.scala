@@ -1,10 +1,8 @@
 package be.dataminded.lighthouse.common
 
+import better.files._
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.{AmazonS3ClientBuilder, AmazonS3URI}
-
-import scala.io.Source
-import better.files._
 
 /**
   * Object helps abstract common file system operations
