@@ -11,3 +11,6 @@ sealed trait SparkOverwriteBehavior {
 case object FullOverwrite extends SparkOverwriteBehavior { val name = "FullOverwrite" }
 
 case object PartitionOverwrite extends SparkOverwriteBehavior { val name = "PartitionOverwrite" }
+
+case object MultiplePartitionOverwrite extends SparkOverwriteBehavior { val name = "MultiplePartitionOverwrite" }
+

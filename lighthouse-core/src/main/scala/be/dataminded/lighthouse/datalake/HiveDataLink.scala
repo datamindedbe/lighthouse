@@ -38,6 +38,7 @@ class HiveDataLink(val path: LazyConfig[String],
     (saveMode, overwriteBehavior) match {
       // Only overwrite a single partition in this case
       case (SaveMode.Overwrite, PartitionOverwrite) =>
+        // TODO: Do we need it since spark 2.3.0? See MultiplePartitionOverwrite
         // Extract the base path based on the full path and partitionedBy information. Ordering matters!
         val basePath = partitionedBy.reverse.foldLeft(path.trim().stripSuffix("/")) {
           case (p, ptn) => p.substring(0, p.lastIndexOf(ptn)).trim().stripSuffix("/")
@@ -65,6 +66,34 @@ class HiveDataLink(val path: LazyConfig[String],
           spark
             .sql(s"ALTER TABLE ${table()} RECOVER PARTITIONS")
             .foreach(_ => ()) // execute DataFrame
+        }
+
+      case (SaveMode.Overwrite, MultiplePartitionOverwrite) =>
+        // Valid since spark 2.3.0 only
+        // Make sure that conf.set("spark.sql.sources.partitionOverwriteMode","dynamic")
+        // If table does not exist yet, create new table
+        if (spark.conf.get("spark.sql.sources.partitionOverwriteMode") != "dynamic") {
+          throw new IllegalStateException("MultiplePartitionOverwrite can only be used with " +
+            "partitionOverwriteMode='dynamic' set and Spark since 2.3.0. \n" +
+            "Current Spark version: " + spark.version + ". \n" +
+            "Current partitionOverwriteMode value: " + spark.conf.get("spark.sql.sources.partitionOverwriteMode"))
+        }
+
+        if (!spark.catalog.tableExists(table())) {
+          // Create table
+          dataset.write
+            .format(format.toString)
+            .partitionBy(partitionedBy: _*)
+            .mode(saveMode)
+            .option("path", path)
+            .options(options)
+            .saveAsTable(table())
+        } else {
+          dataset.write
+            .format(format.toString)
+            .mode(saveMode)
+            .options(options)
+            .insertInto(table())
         }
 
       // In any other case use default spark write behavior
