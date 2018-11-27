@@ -1,5 +1,6 @@
 package be.dataminded.lighthouse.datalake
 
+import be.dataminded.lighthouse.spark.SparkOverwriteBehavior._
 import be.dataminded.lighthouse.spark._
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
@@ -72,12 +73,14 @@ class HiveDataLink(val path: LazyConfig[String],
         // Valid since spark 2.3.0 only
         // Make sure that conf.set("spark.sql.sources.partitionOverwriteMode","dynamic")
         // If table does not exist yet, create new table
-        if (spark.conf.get("spark.sql.sources.partitionOverwriteMode") != "dynamic") {
-          throw new IllegalStateException("MultiplePartitionOverwrite can only be used with " +
-            "partitionOverwriteMode='dynamic' set and Spark since 2.3.0. \n" +
-            "Current Spark version: " + spark.version + ". \n" +
-            "Current partitionOverwriteMode value: " + spark.conf.get("spark.sql.sources.partitionOverwriteMode"))
-        }
+        val partitionOverwriteMode = spark.conf.get("spark.sql.sources.partitionOverwriteMode")
+        assert(
+          partitionOverwriteMode == "dynamic",
+          s"""MultiplePartitionOverwrite can only be used with partitionOverwriteMode='dynamic' set and Spark since 2.3.0.
+            |Current Spark version: ${spark.version}
+            |Current partitionOverwriteMode value: $partitionOverwriteMode
+          """.stripMargin
+        )
 
         if (!spark.catalog.tableExists(table())) {
           // Create table

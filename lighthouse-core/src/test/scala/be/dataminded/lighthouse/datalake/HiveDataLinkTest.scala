@@ -1,10 +1,9 @@
 package be.dataminded.lighthouse.datalake
 
 import be.dataminded.lighthouse.Models
-import be.dataminded.lighthouse.spark.{MultiplePartitionOverwrite, Orc, SparkFileFormat, SparkOverwriteBehavior}
+import be.dataminded.lighthouse.spark.SparkOverwriteBehavior._
 import be.dataminded.lighthouse.testing.SparkFunSuite
 import better.files._
-import org.apache.spark.sql.SaveMode
 import org.scalatest.{BeforeAndAfter, Matchers}
 
 class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
@@ -45,18 +44,16 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
       Models.RawCustomer("3", "Donald", "Glover", "1983")
     ).toDF()
 
-    val ref     = new HiveDataLink(
+    val ref = new HiveDataLink(
       path = "./target/output/orc",
       database = "default",
-      table = "customer",
-      format = Orc,
-      saveMode = SaveMode.Overwrite,
-      partitionedBy =  List("yearOfBirth"),
-      overwriteBehavior = MultiplePartitionOverwrite,
-      options = Map.empty)
+      table = "client",
+      partitionedBy = List("yearOfBirth"),
+      overwriteBehavior = MultiplePartitionOverwrite
+    )
 
     ref.write(dataset)
-    ref.readAs[Models.RawCustomer].count should equal(3)
+    ref.readAs[Models.RawCustomer]().count should equal(3)
 
     val updating = Seq(
       Models.RawCustomer("4", "Kate", "Middleton", "1982")
@@ -64,7 +61,7 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
 
     ref.write(updating)
     //debug
-    ref.readAs[Models.RawCustomer].collect().foreach(println)
+    ref.readAs[Models.RawCustomer]().show()
     println("Current Spark version: " + spark.version)
     println("Current partitionOverwriteMode value: " + spark.conf.get("spark.sql.sources.partitionOverwriteMode"))
     //debug

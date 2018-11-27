@@ -18,7 +18,7 @@ lazy val buildSettings = Seq(
     "-Dspark.shuffle.sort.bypassMergeThreshold=2",
     "-Dlighthouse.environment=test"
   ),
-  scalacOptions ++= Seq("-Ypartial-unification", "-Ywarn-value-discard"),
+  scalacOptions ++= Seq("-Ypartial-unification"),
   // Git versioning
   git.useGitDescribe := true,
   git.baseVersion := "0.0.0",
