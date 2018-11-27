@@ -60,12 +60,6 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
     ).toDF()
 
     ref.write(updating)
-    //debug
-    ref.readAs[Models.RawCustomer]().show()
-    println("Current Spark version: " + spark.version)
-    println("Current partitionOverwriteMode value: " + spark.conf.get("spark.sql.sources.partitionOverwriteMode"))
-    //debug
-
     ref.readAs[Models.RawCustomer].count should equal(2)
 
     val expected = Seq(
