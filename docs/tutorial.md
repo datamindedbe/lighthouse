@@ -16,13 +16,13 @@ Start by adding the Lighthouse dependency to your project. In case you are using
 <dependency>
     <groupId>be.dataminded</groupId>
     <artifactId>lighthouse_2.11</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.5</version>
 </dependency>
 ```
 or sbt:
 
 ```scala
-libraryDependencies += "be.dataminded" % "lighthouse" %% "0.2.0"
+libraryDependencies += "be.dataminded" %% "lighthouse" % "0.2.5"
 ```
 You can also manually clone and build Lighthouse. You can get the repo here:
 ```
@@ -228,4 +228,4 @@ Note that this time, we made it a `HiveDataLink` and we store it in the table `a
 
  
 ### Demo
-You can find the full source code of this example in the `lighthouse-demo` folder of the Lighthouse repository. [Unit tests](https://github.com/datamindedbe/lighthouse/tree/master/lighthouse-core/src/test) are available to show how each aspect is supposed to work, on your own machine. As Lighthouse is just a Spark library, you can deploy it in your normal deployment pipeline, you cen include it in your jar, and simply submit Spark jobs to your cluster. 
+You can find the full source code of this example in the `lighthouse-demo` folder of the Lighthouse repository. [Unit tests](https://github.com/datamindedbe/lighthouse/tree/master/lighthouse-core/src/test) are available to show how each aspect is supposed to work, on your own machine. As Lighthouse is just a Spark library, you can deploy it in your normal deployment pipeline, you can include it in your jar, and simply submit Spark jobs to your cluster. 
