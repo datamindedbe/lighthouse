@@ -39,7 +39,7 @@ class HiveDataLink(val path: LazyConfig[String],
     (saveMode, overwriteBehavior) match {
       // Only overwrite a single partition in this case
       case (SaveMode.Overwrite, PartitionOverwrite) =>
-        // TODO: Do we need it since spark 2.3.0? See MultiplePartitionOverwrite
+        // It works fine with Spark below 2.3.0
         // Extract the base path based on the full path and partitionedBy information. Ordering matters!
         val basePath = partitionedBy.reverse.foldLeft(path.trim().stripSuffix("/")) {
           case (p, ptn) => p.substring(0, p.lastIndexOf(ptn)).trim().stripSuffix("/")

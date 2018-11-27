@@ -60,15 +60,14 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
     ).toDF()
 
     ref.write(updating)
-    ref.readAs[Models.RawCustomer].count should equal(2)
+    ref.readAs[Models.RawCustomer]().count should equal(2)
 
     val expected = Seq(
       Models.RawCustomer("4", "Kate", "Middleton", "1982"),
       Models.RawCustomer("3", "Donald", "Glover", "1983")
     )
 
-    import spark.implicits._
-    ref.readAs[Models.RawCustomer].collect() should contain theSameElementsAs expected
+    ref.readAs[Models.RawCustomer]().collect() should contain theSameElementsAs expected
 
     //TODO: Result is correct, matcher fails: investigate
     //spark.catalog.listTables().collect() should contain (new org.apache.spark.sql.catalog.Table(
