@@ -17,7 +17,8 @@ trait SparkSessions {
     "spark.serializer"                                       -> "org.apache.spark.serializer.KryoSerializer",
     "spark.sql.avro.compression.codec"                       -> "snappy",
     "spark.sql.parquet.compression.codec"                    -> "snappy",
-    "spark.sql.sources.partitionColumnTypeInference.enabled" -> "false"
+    "spark.sql.sources.partitionColumnTypeInference.enabled" -> "false",
+    "spark.sql.sources.partitionOverwriteMode"               -> "dynamic"
   )
 
   lazy val spark: SparkSession =

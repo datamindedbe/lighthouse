@@ -1,5 +1,6 @@
 package be.dataminded.lighthouse.datalake
 
+import be.dataminded.lighthouse.spark.SparkOverwriteBehavior._
 import be.dataminded.lighthouse.spark._
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
@@ -38,6 +39,7 @@ class HiveDataLink(val path: LazyConfig[String],
     (saveMode, overwriteBehavior) match {
       // Only overwrite a single partition in this case
       case (SaveMode.Overwrite, PartitionOverwrite) =>
+        // It works fine with Spark below 2.3.0
         // Extract the base path based on the full path and partitionedBy information. Ordering matters!
         val basePath = partitionedBy.reverse.foldLeft(path.trim().stripSuffix("/")) {
           case (p, ptn) => p.substring(0, p.lastIndexOf(ptn)).trim().stripSuffix("/")
@@ -65,6 +67,36 @@ class HiveDataLink(val path: LazyConfig[String],
           spark
             .sql(s"ALTER TABLE ${table()} RECOVER PARTITIONS")
             .foreach(_ => ()) // execute DataFrame
+        }
+
+      case (SaveMode.Overwrite, MultiplePartitionOverwrite) =>
+        // Valid since spark 2.3.0 only
+        // Make sure that conf.set("spark.sql.sources.partitionOverwriteMode","dynamic")
+        // If table does not exist yet, create new table
+        val partitionOverwriteMode = spark.conf.get("spark.sql.sources.partitionOverwriteMode")
+        assert(
+          partitionOverwriteMode == "dynamic",
+          s"""MultiplePartitionOverwrite can only be used with partitionOverwriteMode='dynamic' set and Spark since 2.3.0.
+            |Current Spark version: ${spark.version}
+            |Current partitionOverwriteMode value: $partitionOverwriteMode
+          """.stripMargin
+        )
+
+        if (!spark.catalog.tableExists(table())) {
+          // Create table
+          dataset.write
+            .format(format.toString)
+            .partitionBy(partitionedBy: _*)
+            .mode(saveMode)
+            .option("path", path)
+            .options(options)
+            .saveAsTable(table())
+        } else {
+          dataset.write
+            .format(format.toString)
+            .mode(saveMode)
+            .options(options)
+            .insertInto(table())
         }
 
       // In any other case use default spark write behavior
