@@ -1,10 +1,12 @@
 import Dependencies._
+import Predef._
 import Resolvers._
 import sbt.Opts.resolver.sonatypeStaging
 
 lazy val buildSettings = Seq(
   organization := "be.dataminded",
-  scalaVersion := "2.11.12",
+  scalaVersion := scala211,
+  crossScalaVersions := Nil,
   // Ensure code quality
   scalafmtOnCompile := true,
   // Memory settings to be able to test with Spark
@@ -18,7 +20,7 @@ lazy val buildSettings = Seq(
     "-Dspark.shuffle.sort.bypassMergeThreshold=2",
     "-Dlighthouse.environment=test"
   ),
-  scalacOptions ++= Seq("-Ypartial-unification"),
+  scalacOptions ++= Seq("-Ypartial-unification", "-deprecation"),
   // Git versioning
   git.useGitDescribe := true,
   git.baseVersion := "0.0.0",
@@ -41,10 +43,10 @@ lazy val `lighthouse-platform` = (project in file("."))
 lazy val lighthouse = (project in file("lighthouse-core"))
   .dependsOn(`lighthouse-testing` % "test->compile")
   .enablePlugins(SiteScaladocPlugin)
-  .settings(buildSettings, libraryDependencies ++= commonDependencies ++ Seq(cats, typesafeConfig))
+  .settings(buildSettings, libraryDependencies ++= commonDependencies ++ Seq(cats, typesafeConfig), crossScalaVersions := supportedScalaVersions)
 
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
-  .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles))
+  .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles), crossScalaVersions := supportedScalaVersions)
 
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
   .dependsOn(lighthouse, `lighthouse-testing` % "test->compile")
