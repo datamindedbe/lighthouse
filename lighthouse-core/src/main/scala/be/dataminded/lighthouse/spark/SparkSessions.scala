@@ -21,11 +21,15 @@ trait SparkSessions {
     "spark.sql.sources.partitionOverwriteMode"               -> "dynamic"
   )
 
-  lazy val spark: SparkSession =
+  val enableHiveSupport: Boolean = true
+
+  lazy val sparkSessionBuilder: SparkSession.Builder =
     (defaultConfiguration ++ sparkOptions)
       .foldLeft(SparkSession.builder()) {
         case (b, (key, value)) => b.config(key, value)
       }
-      .enableHiveSupport()
-      .getOrCreate()
+
+  lazy val spark: SparkSession =
+    if (enableHiveSupport) sparkSessionBuilder.enableHiveSupport().getOrCreate()
+    else sparkSessionBuilder.getOrCreate()
 }
