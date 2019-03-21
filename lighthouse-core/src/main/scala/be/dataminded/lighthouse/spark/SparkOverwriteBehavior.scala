@@ -3,11 +3,16 @@ package be.dataminded.lighthouse.spark
 /**
   * Type-safe objects to express partition overwrite behavior
   */
-sealed trait SparkOverwriteBehavior {
-  val name: String
+sealed abstract class SparkOverwriteBehavior(name: String) {
   override def toString: String = name
 }
 
-case object FullOverwrite extends SparkOverwriteBehavior { val name = "FullOverwrite" }
+object SparkOverwriteBehavior {
 
-case object PartitionOverwrite extends SparkOverwriteBehavior { val name = "PartitionOverwrite" }
+  case object FullOverwrite extends SparkOverwriteBehavior("FullOverwrite")
+
+  case object PartitionOverwrite extends SparkOverwriteBehavior("PartitionOverwrite")
+
+  case object MultiplePartitionOverwrite extends SparkOverwriteBehavior("MultiplePartitionOverwrite")
+
+}

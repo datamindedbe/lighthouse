@@ -17,14 +17,19 @@ trait SparkSessions {
     "spark.serializer"                                       -> "org.apache.spark.serializer.KryoSerializer",
     "spark.sql.avro.compression.codec"                       -> "snappy",
     "spark.sql.parquet.compression.codec"                    -> "snappy",
-    "spark.sql.sources.partitionColumnTypeInference.enabled" -> "false"
+    "spark.sql.sources.partitionColumnTypeInference.enabled" -> "false",
+    "spark.sql.sources.partitionOverwriteMode"               -> "dynamic"
   )
 
-  lazy val spark: SparkSession =
+  val enableHiveSupport: Boolean = true
+
+  lazy val sparkSessionBuilder: SparkSession.Builder =
     (defaultConfiguration ++ sparkOptions)
       .foldLeft(SparkSession.builder()) {
         case (b, (key, value)) => b.config(key, value)
       }
-      .enableHiveSupport()
-      .getOrCreate()
+
+  lazy val spark: SparkSession =
+    if (enableHiveSupport) sparkSessionBuilder.enableHiveSupport().getOrCreate()
+    else sparkSessionBuilder.getOrCreate()
 }
