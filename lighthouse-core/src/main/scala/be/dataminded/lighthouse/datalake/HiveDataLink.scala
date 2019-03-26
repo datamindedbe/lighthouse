@@ -78,9 +78,7 @@ class HiveDataLink(val path: LazyConfig[String],
             .save(path)
 
           // Update partition information based on
-          spark
-            .sql(s"ALTER TABLE ${table()} RECOVER PARTITIONS")
-            .foreach(_ => ()) // execute DataFrame
+          spark.catalog.recoverPartitions(table())
         }
 
       case (SaveMode.Overwrite, MultiplePartitionOverwrite) =>
