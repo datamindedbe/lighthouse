@@ -7,6 +7,20 @@ import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 /**
   * Reference to data stored on hive
   *
+  *
+  * For different combinations with saveMode and overwriteBehavior different implementations are used.
+  * The cases are:
+  *
+  * (SaveMode.Overwrite, PartitionOverwrite) => In this case we can overwrite one partition for example the ingest date.
+  * You can find an example in the HiveDataLinkTest.
+  *
+  * (SaveMode.Overwrite, MultiplePartitionOverwrite) => This case we overwrite multiple partitions at the same time.
+  *
+  * _ => All the other cases.
+  *
+  * You can see the code on how they are implemented.
+  *
+  *
   * @constructor create a new hive data reference
   * @param path               The location on the file system
   * @param format             The format the data is stored in
