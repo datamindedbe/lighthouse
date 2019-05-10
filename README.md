@@ -38,5 +38,4 @@ If you are using Maven, add this to your `pom.xml`:
 
 ## Online Documentation
 
-This README file only contains basic instructions. 
-A website is under-construction and will provide more information and examples.
+This README file only contains basic instructions. Here is a more complete tutorial: https://datamindedbe.github.io/lighthouse/tutorial/
