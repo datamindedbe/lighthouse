@@ -16,7 +16,8 @@ class TextSinkSpec extends FunSpec with SharedSparkSession with Matchers with Be
 
       ("target" / "output" / "text").glob("*.txt").map(_.contentAsString).toSeq should contain theSameElementsAs Seq(
         "datadata\n",
-        "datadatadata\n")
+        "datadatadata\n"
+      )
     }
   }
 

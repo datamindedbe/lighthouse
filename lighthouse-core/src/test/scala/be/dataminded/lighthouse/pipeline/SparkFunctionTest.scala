@@ -207,9 +207,11 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
         Seq(RawPerson("Bernard Chanson", 34), RawPerson("Ron Swanson", 35), RawPerson("Karl von Bauchspeck", 28)).toDS()
 
       assertDatasetEquality(spark.read.orc("./target/output/orc").as[RawPerson], expected, orderedComparison = false)
-      assertDatasetEquality(spark.read.parquet("./target/output/parquet").as[RawPerson],
-                            expected,
-                            orderedComparison = false)
+      assertDatasetEquality(
+        spark.read.parquet("./target/output/parquet").as[RawPerson],
+        expected,
+        orderedComparison = false
+      )
     }
 
     object PersonTransformations {

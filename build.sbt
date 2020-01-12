@@ -20,7 +20,13 @@ lazy val buildSettings = Seq(
     "-Dspark.shuffle.sort.bypassMergeThreshold=2",
     "-Dlighthouse.environment=test"
   ),
-  scalacOptions ++= Seq("-Ypartial-unification", "-deprecation"),
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-optimize",
+    "-unchecked",
+    "-Ydelambdafy:inline",
+    "-Ypartial-unification"
+  ),
   // Git versioning
   git.useGitDescribe := true,
   git.baseVersion := "0.0.0",
@@ -29,9 +35,11 @@ lazy val buildSettings = Seq(
   publishTo := Some(if (isSnapshot.value) datamindedSnapshots else sonatypeStaging),
   homepage := Some(url("https://github.com/datamindedbe/lighthouse")),
   scmInfo := Some(
-    ScmInfo(url("https://github.com/datamindedbe/lighthouse"), "git@github.com:datamindedbe/lighthouse.git")),
+    ScmInfo(url("https://github.com/datamindedbe/lighthouse"), "git@github.com:datamindedbe/lighthouse.git")
+  ),
   developers := List(
-    Developer("mlavaert", "Mathias Lavaert", "mathias.lavaert@dataminded.be", url("https://github.com/mlavaert"))),
+    Developer("mlavaert", "Mathias Lavaert", "mathias.lavaert@dataminded.be", url("https://github.com/mlavaert"))
+  ),
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 )
 
@@ -43,10 +51,18 @@ lazy val `lighthouse-platform` = (project in file("."))
 lazy val lighthouse = (project in file("lighthouse-core"))
   .dependsOn(`lighthouse-testing` % "test->compile")
   .enablePlugins(SiteScaladocPlugin)
-  .settings(buildSettings, libraryDependencies ++= commonDependencies ++ Seq(cats, typesafeConfig), crossScalaVersions := supportedScalaVersions)
+  .settings(
+    buildSettings,
+    libraryDependencies ++= commonDependencies ++ Seq(cats, typesafeConfig),
+    crossScalaVersions := supportedScalaVersions
+  )
 
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
-  .settings(buildSettings, libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles), crossScalaVersions := supportedScalaVersions)
+  .settings(
+    buildSettings,
+    libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles),
+    crossScalaVersions := supportedScalaVersions
+  )
 
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
   .dependsOn(lighthouse, `lighthouse-testing` % "test->compile")

@@ -2,11 +2,12 @@ package be.dataminded.lighthouse.datalake
 
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
-class AvroDataLink(val path: LazyConfig[String],
-                   saveMode: SaveMode = SaveMode.Overwrite,
-                   partitionedBy: List[String] = List.empty,
-                   options: Map[String, String] = Map.empty)
-    extends PathBasedDataLink {
+class AvroDataLink(
+    val path: LazyConfig[String],
+    saveMode: SaveMode = SaveMode.Overwrite,
+    partitionedBy: List[String] = List.empty,
+    options: Map[String, String] = Map.empty
+) extends PathBasedDataLink {
 
   override def doRead(path: String): DataFrame = {
     spark.read

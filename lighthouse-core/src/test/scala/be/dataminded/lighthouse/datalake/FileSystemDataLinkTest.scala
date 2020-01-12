@@ -36,7 +36,9 @@ class FileSystemDataLinkTest extends SparkFunSuite with Matchers with BeforeAndA
         StructField("id", ByteType) ::
           StructField("firstName", StringType, nullable = true) ::
           StructField("lastName", StringType, nullable = true) ::
-          StructField("yearOfBirth", ShortType, nullable = true) :: Nil))
+          StructField("yearOfBirth", ShortType, nullable = true) :: Nil
+      )
+    )
     val link    = new FileSystemDataLink(path = customerPath, format = Csv, options = options, schema = schema)
     val dataset = link.read()
 

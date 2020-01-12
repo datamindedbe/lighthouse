@@ -32,15 +32,16 @@ import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
   * @param database           The name of the database
   * @param table              The name of the table
   */
-class HiveDataLink(val path: LazyConfig[String],
-                   database: LazyConfig[String],
-                   table: LazyConfig[String],
-                   format: SparkFileFormat = Orc,
-                   saveMode: SaveMode = SaveMode.Overwrite,
-                   partitionedBy: List[String] = Nil,
-                   overwriteBehavior: SparkOverwriteBehavior = FullOverwrite,
-                   options: Map[String, String] = Map.empty)
-    extends PathBasedDataLink {
+class HiveDataLink(
+    val path: LazyConfig[String],
+    database: LazyConfig[String],
+    table: LazyConfig[String],
+    format: SparkFileFormat = Orc,
+    saveMode: SaveMode = SaveMode.Overwrite,
+    partitionedBy: List[String] = Nil,
+    overwriteBehavior: SparkOverwriteBehavior = FullOverwrite,
+    options: Map[String, String] = Map.empty
+) extends PathBasedDataLink {
 
   override def doRead(path: String): DataFrame = {
     spark.catalog.setCurrentDatabase(database())

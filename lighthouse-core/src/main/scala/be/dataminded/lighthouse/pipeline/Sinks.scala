@@ -38,7 +38,8 @@ class PartitionedOrcSink(path: String, partitionsColumns: Seq[String], mode: Sav
         .mode(mode)
         .option("compression", "zlib")
         .partitionBy(partitionsColumns: _*)
-        .orc(path)) match {
+        .orc(path)
+    ) match {
       case Success(_) => SaveSuccess
       case Failure(e) =>
         logger.warn("Something went wrong writing the dataset", e)
