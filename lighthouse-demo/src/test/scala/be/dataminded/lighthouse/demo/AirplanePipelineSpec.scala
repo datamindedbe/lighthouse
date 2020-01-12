@@ -35,7 +35,8 @@ class AirplanePipelineSpec
     cleanWeatherStations.schema should equal(
       StructType(
         StructField("WBAN", IntegerType) :: StructField("IAT", StringType) :: Nil
-      ))
+      )
+    )
   }
 
   test("Small functions can be tested easier") {
@@ -50,7 +51,8 @@ class AirplanePipelineSpec
     result.schema should equal(
       StructType(
         StructField("WBAN", IntegerType, nullable = false) :: StructField("IAT", StringType) :: Nil
-      ))
+      )
+    )
   }
 
   test("We can easily test for content using one of the included DatasetComparer") {

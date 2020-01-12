@@ -26,8 +26,10 @@ sealed trait DatasetComparerLike {
     } else {
       val sortedActual   = defaultSortedDataset(actual)
       val sortedExpected = defaultSortedDataset(expected)
-      assert(sortedActual.collect().sameElements(sortedExpected.collect()),
-             contentMismatchMessage(sortedActual, sortedExpected))
+      assert(
+        sortedActual.collect().sameElements(sortedExpected.collect()),
+        contentMismatchMessage(sortedActual, sortedExpected)
+      )
     }
   }
 

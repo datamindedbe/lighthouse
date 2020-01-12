@@ -13,13 +13,14 @@ import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
   * @param saveMode      the save mode to apply (overwrite, append)
   * @param partitionedBy the partitioning to apply
   */
-class FileSystemDataLink(val path: LazyConfig[String],
-                         format: SparkFileFormat = Orc,
-                         saveMode: SaveMode = SaveMode.Overwrite,
-                         partitionedBy: List[String] = List.empty,
-                         options: Map[String, String] = Map.empty,
-                         schema: Option[StructType] = None)
-    extends PathBasedDataLink {
+class FileSystemDataLink(
+    val path: LazyConfig[String],
+    format: SparkFileFormat = Orc,
+    saveMode: SaveMode = SaveMode.Overwrite,
+    partitionedBy: List[String] = List.empty,
+    options: Map[String, String] = Map.empty,
+    schema: Option[StructType] = None
+) extends PathBasedDataLink {
 
   override def doRead(path: String): DataFrame = {
     schema match {

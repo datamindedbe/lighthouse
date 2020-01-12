@@ -25,17 +25,18 @@ import scala.util.{Failure, Success, Try}
   *                           is taken to decide the batch size
   * @param saveMode           Spark sql SaveMode
   */
-class JdbcDataLink(url: LazyConfig[String],
-                   username: LazyConfig[String],
-                   password: LazyConfig[String],
-                   driver: LazyConfig[String],
-                   table: LazyConfig[String],
-                   extraProperties: LazyConfig[Map[String, String]] = LazyConfig(Map.empty[String, String]),
-                   partitionColumn: LazyConfig[String] = "",
-                   numberOfPartitions: LazyConfig[Int] = 0,
-                   batchSize: LazyConfig[Int] = 50000,
-                   saveMode: SaveMode = SaveMode.Append)
-    extends DataLink {
+class JdbcDataLink(
+    url: LazyConfig[String],
+    username: LazyConfig[String],
+    password: LazyConfig[String],
+    driver: LazyConfig[String],
+    table: LazyConfig[String],
+    extraProperties: LazyConfig[Map[String, String]] = LazyConfig(Map.empty[String, String]),
+    partitionColumn: LazyConfig[String] = "",
+    numberOfPartitions: LazyConfig[Int] = 0,
+    batchSize: LazyConfig[Int] = 50000,
+    saveMode: SaveMode = SaveMode.Append
+) extends DataLink {
 
   // build the connection properties with some default extra ones
   lazy val connectionProperties: Map[String, String] = {
@@ -126,13 +127,17 @@ class JdbcDataLink(url: LazyConfig[String],
   }
 
   // Translate partition information to properties map usable by spark
-  private def convertToReadParamsMap(partitionColumn: String,
-                                     lowerBound: Long,
-                                     upperBound: Long,
-                                     numPartitions: Long): Map[String, String] = {
-    Map("partitionColumn" -> partitionColumn,
-        "lowerBound"      -> lowerBound.toString,
-        "upperBound"      -> upperBound.toString,
-        "numPartitions"   -> numPartitions.toString)
+  private def convertToReadParamsMap(
+      partitionColumn: String,
+      lowerBound: Long,
+      upperBound: Long,
+      numPartitions: Long
+  ): Map[String, String] = {
+    Map(
+      "partitionColumn" -> partitionColumn,
+      "lowerBound"      -> lowerBound.toString,
+      "upperBound"      -> upperBound.toString,
+      "numPartitions"   -> numPartitions.toString
+    )
   }
 }

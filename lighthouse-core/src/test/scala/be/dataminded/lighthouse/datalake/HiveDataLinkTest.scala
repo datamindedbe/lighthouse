@@ -33,27 +33,29 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterEa
     import spark.implicits._
     val filePath = "./target/output/orc"
     import org.apache.spark.sql.functions._
-    val saveMode = SaveMode.Overwrite
+    val saveMode    = SaveMode.Overwrite
     val ingestDate1 = LocalDate.of(1982, DECEMBER, 21)
-    val dataset1 = Seq(Models.RawCustomer("1", "Pascal", "Knapen", "1982")).toDS()
+    val dataset1 = Seq(Models.RawCustomer("1", "Pascal", "Knapen", "1982"))
+      .toDS()
       .withColumn("ingestDate", lit(java.sql.Date.valueOf(ingestDate1)))
-    val ref = new HiveDataLink(path = filePath, database = "default", table = "customer",
-      partitionedBy = List("ingestDate"))
+    val ref =
+      new HiveDataLink(path = filePath, database = "default", table = "customer", partitionedBy = List("ingestDate"))
     ref.snapshotOf(LocalDate.of(1982, DECEMBER, 21))
     ref.write(dataset1)
     ref.readAs[Models.RawCustomer]().count should equal(1)
     val rootFile = new java.io.File(filePath)
     rootFile.listFiles.filter(_.isDirectory).toList should
-      (contain (new java.io.File(s"$filePath/ingestDate=1982-12-21")) and have length 1)
+      (contain(new java.io.File(s"$filePath/ingestDate=1982-12-21")) and have length 1)
 
     val ingestDate2 = LocalDate.of(1982, DECEMBER, 22)
-    val dataset2 = Seq(Models.RawCustomer("2", "Elisabeth", "Moss", "1982")).toDS()
+    val dataset2 = Seq(Models.RawCustomer("2", "Elisabeth", "Moss", "1982"))
+      .toDS()
       .withColumn("ingestDate", lit(java.sql.Date.valueOf(ingestDate2)))
 
     ref.write(dataset2)
     ref.readAs[Models.RawCustomer]().count should equal(2)
     rootFile.listFiles.filter(_.isDirectory).toList should
-      (contain (new java.io.File(s"$filePath/ingestDate=1982-12-22")) and have length 2)
+      (contain(new java.io.File(s"$filePath/ingestDate=1982-12-22")) and have length 2)
   }
 
   test("A hive data reference can be used to write a dataframe") {
@@ -106,7 +108,7 @@ class HiveDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterEa
     //name = "customer", database = "default", description = null, tableType = "EXTERNAL", isTemporary = false))
   }
 
-  override def beforeEach(): Unit =  {
+  override def beforeEach(): Unit = {
     ("target" / "output").delete(swallowIOExceptions = true)
   }
 }

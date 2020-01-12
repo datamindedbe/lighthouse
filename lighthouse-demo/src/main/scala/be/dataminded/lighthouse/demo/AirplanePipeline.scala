@@ -73,7 +73,8 @@ trait AirplanePipeline {
       .join(
         dailyWeatherWithStation,
         airlines("Origin") === dailyWeatherWithStation("IAT") && airlines("YearMonthDay") === dailyWeatherWithStation(
-          "YearMonthDay"),
+          "YearMonthDay"
+        ),
         "left_outer"
       )
       .drop("IAT")
@@ -86,7 +87,8 @@ trait AirplanePipeline {
       .join(
         dailyWeatherWithStation,
         airlines("Dest") === dailyWeatherWithStation("IAT") && airlines("YearMonthDay") === dailyWeatherWithStation(
-          "YearMonthDay"),
+          "YearMonthDay"
+        ),
         "left_outer"
       )
       .drop(dailyWeatherWithStation("YearMonthDay"))
