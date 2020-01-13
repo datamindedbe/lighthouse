@@ -3,9 +3,10 @@ package be.dataminded.lighthouse.common
 import java.time.LocalDate
 
 import be.dataminded.lighthouse.common.DateTimeFormatters._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class DateTimeFormattersTest extends FunSuite with Matchers {
+class DateTimeFormattersTest extends AnyFunSuite with Matchers {
 
   test("Simple Date Format should format a date like yyyy/MM/dd") {
     val result = SimpleDateFormat.format(LocalDate.of(1990, 1, 1))

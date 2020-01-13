@@ -6,7 +6,7 @@ import org.apache.spark.sql.SparkSession
 
 trait SparkFunction[+A] {
 
-  def run(spark: SparkSession): (A)
+  def run(spark: SparkSession): A
 
   // Enables the box, map, flatMap and for-comprehension support
   def map[B](f: A => B): SparkFunction[B] = monad.map(this)(f)

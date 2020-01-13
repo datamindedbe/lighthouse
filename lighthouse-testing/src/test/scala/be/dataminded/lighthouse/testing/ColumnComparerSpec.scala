@@ -1,9 +1,9 @@
 package be.dataminded.lighthouse.testing
 
 import org.apache.spark.sql.functions._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class ColumnComparerSpec extends FunSpec with SharedSparkSession with ColumnComparer {
+class ColumnComparerSpec extends AnyFunSpec with SharedSparkSession with ColumnComparer {
 
   import spark.implicits._
 

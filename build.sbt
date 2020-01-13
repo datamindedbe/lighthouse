@@ -25,7 +25,8 @@ lazy val buildSettings = Seq(
     "-optimize",
     "-unchecked",
     "-Ydelambdafy:inline",
-    "-Ypartial-unification"
+    "-Ypartial-unification",
+    "-Ywarn-unused-import"
   ),
   // Git versioning
   git.useGitDescribe := true,

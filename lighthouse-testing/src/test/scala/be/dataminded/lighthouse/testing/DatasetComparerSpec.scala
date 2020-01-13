@@ -1,10 +1,10 @@
 package be.dataminded.lighthouse.testing
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-case class Person(name: String, age: Int)
+private case class Person(name: String, age: Int)
 
-class DatasetComparerSpec extends FunSpec with SharedSparkSession with DatasetComparer {
+class DatasetComparerSpec extends AnyFunSpec with SharedSparkSession with DatasetComparer {
 
   import spark.implicits._
 

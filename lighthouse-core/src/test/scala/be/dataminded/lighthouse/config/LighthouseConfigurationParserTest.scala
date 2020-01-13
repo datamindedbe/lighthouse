@@ -3,9 +3,11 @@ package be.dataminded.lighthouse.config
 import java.time.LocalDate
 
 import be.dataminded.lighthouse.datalake.Datalake
-import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class LighthouseConfigurationParserTest extends FunSuite with Matchers with BeforeAndAfterEach {
+class LighthouseConfigurationParserTest extends AnyFunSuite with Matchers with BeforeAndAfterEach {
 
   val parser = new LighthouseConfigurationParser()
 

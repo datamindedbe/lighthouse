@@ -1,8 +1,9 @@
 package be.dataminded.lighthouse.datalake
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class LazyConfigTest extends FunSuite with Matchers {
+class LazyConfigTest extends AnyFunSuite with Matchers {
 
   test("LazyConfig should be evaluated every time is being called") {
     val test: LazyConfig[Long] = System.nanoTime

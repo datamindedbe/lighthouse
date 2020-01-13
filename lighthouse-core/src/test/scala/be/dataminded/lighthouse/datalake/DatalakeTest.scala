@@ -2,11 +2,13 @@ package be.dataminded.lighthouse.datalake
 
 import java.time.{LocalDate, Month}
 
-import org.scalatest.{FunSuite, Matchers, PrivateMethodTester}
+import org.scalatest.PrivateMethodTester
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class DatalakeTest extends FunSuite with Matchers with PrivateMethodTester {
+class DatalakeTest extends AnyFunSuite with Matchers with PrivateMethodTester {
 
-  val datalake = new SampleDatalake()
+  private[this] val datalake = new SampleDatalake()
 
   test("A datalake uses the `test` environment by default") {
     val dataRef = datalake.getDataLink(datalake.uid)
@@ -65,10 +67,10 @@ class DatalakeTest extends FunSuite with Matchers with PrivateMethodTester {
 /**
   * Use a class here to make the tests run in isolation
   */
-class SampleDatalake(executionDate: LocalDate = LocalDate.now()) extends Datalake {
+private class SampleDatalake(executionDate: LocalDate = LocalDate.now()) extends Datalake {
 
-  val uid         = DataUID("datamined", "key")
-  val snapshotUID = DataUID("datamined", "snapshotkey")
+  val uid: DataUID         = DataUID("datamined", "key")
+  val snapshotUID: DataUID = DataUID("datamined", "snapshotkey")
 
   val testRef = new HiveDataLink("s3://test", table = "test", database = "test")
   val accRef  = new HiveDataLink("s3://acc", table = "acc", database = "acc")

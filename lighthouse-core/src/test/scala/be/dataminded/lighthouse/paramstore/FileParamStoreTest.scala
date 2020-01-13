@@ -2,9 +2,10 @@ package be.dataminded.lighthouse.paramstore
 
 import java.nio.file.NoSuchFileException
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class FileParamStoreTest extends FunSuite with Matchers {
+class FileParamStoreTest extends AnyFunSuite with Matchers {
 
   test("Can be used to retrieve a property from file") {
     //TODO: Implement

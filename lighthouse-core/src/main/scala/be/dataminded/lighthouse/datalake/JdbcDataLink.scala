@@ -3,7 +3,6 @@ package be.dataminded.lighthouse.datalake
 import be.dataminded.lighthouse.common.Database
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
-import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
 /**

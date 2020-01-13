@@ -40,5 +40,5 @@ object AirplaneDatalake extends Datalake {
     )
   }
 
-  private def resource(path: String): String = File.resource(path).pathAsString
+  private def resource(path: String): String = Resource.getUrl(path).getPath()
 }

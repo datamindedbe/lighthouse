@@ -2,9 +2,10 @@ package be.dataminded.lighthouse.pipeline
 
 import be.dataminded.lighthouse.testing.SharedSparkSession
 import better.files._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class PartitionedOrcSinkSpec extends FunSpec with SharedSparkSession with Matchers {
+class PartitionedOrcSinkSpec extends AnyFunSpec with SharedSparkSession with Matchers {
 
   import spark.implicits._
 

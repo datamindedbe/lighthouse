@@ -5,9 +5,16 @@ import be.dataminded.lighthouse.testing.{DatasetComparer, SharedSparkSession}
 import better.files._
 import org.apache.spark.sql.functions.count
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
-import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession with DatasetComparer with BeforeAndAfter {
+class SparkFunctionTest
+    extends AnyFunSpec
+    with Matchers
+    with SharedSparkSession
+    with DatasetComparer
+    with BeforeAndAfter {
 
   import spark.implicits._
 
@@ -101,8 +108,8 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
 
   describe("Demonstrate SparkFunctions using a SparkSession") {
 
-    val customerPath: String = File.resource("customers.csv").pathAsString
-    val ordersPath: String   = File.resource("orders.csv").pathAsString
+    val customerPath: String = Resource.getUrl("customers.csv").getPath()
+    val ordersPath: String   = Resource.getUrl("orders.csv").getPath()
 
     it("A SparkFunction can be used with a SparkSession") {
       val pipeline = SparkFunction { spark =>
@@ -218,13 +225,14 @@ class SparkFunctionTest extends FunSpec with Matchers with SharedSparkSession wi
 
       def dedup(persons: Dataset[RawPerson]): Dataset[RawPerson] = persons.distinct()
 
-      def normalize(persons: Dataset[RawPerson]) = SparkFunction { spark: SparkSession =>
-        import spark.implicits._
+      def normalize(persons: Dataset[RawPerson]): SparkFunction[Dataset[BasePerson]] = SparkFunction {
+        spark: SparkSession =>
+          import spark.implicits._
 
-        persons.map { raw =>
-          val tokens = raw.name.split(" ")
-          BasePerson(tokens(0), tokens(1), raw.age)
-        }
+          persons.map { raw =>
+            val tokens = raw.name.split(" ")
+            BasePerson(tokens(0), tokens(1), raw.age)
+          }
       }
 
       def returnBase(basePersons: Dataset[BasePerson]): Dataset[BasePerson] = basePersons

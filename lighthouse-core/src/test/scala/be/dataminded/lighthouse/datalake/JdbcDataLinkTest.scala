@@ -3,11 +3,15 @@ package be.dataminded.lighthouse.datalake
 import be.dataminded.lighthouse.common.Database
 import be.dataminded.lighthouse.testing.SparkFunSuite
 import org.apache.spark.sql.SaveMode
-import org.scalatest.{BeforeAndAfterAll, Matchers}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
 
 case class test_table(ID: java.lang.Integer, STR: String)
 
 class JdbcDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterAll {
+  import spark.implicits._
+
+  private val extraOptions = Map("MODE" -> "MYSQL")
 
   override protected def beforeAll(): Unit = {
     Database.inMemory("test", Map("MODE" -> "MYSQL", "user" -> "sa", "DB_CLOSE_DELAY" -> "-1")).withConnection { con =>
@@ -24,11 +28,7 @@ class JdbcDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterAl
     }
   }
 
-  val extraOptions = Map("MODE" -> "MYSQL")
-
   test("Reading JDBC datalink") {
-    import spark.implicits._
-
     val jdbcDataLink = new JdbcDataLink(
       url = "jdbc:h2:mem:test",
       username = "TEST",
@@ -43,8 +43,6 @@ class JdbcDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfterAl
   }
 
   test("Append JDBC datalink") {
-    import spark.implicits._
-
     val jdbcDataLink = new JdbcDataLink(
       url = "jdbc:h2:mem:test",
       username = "TEST",

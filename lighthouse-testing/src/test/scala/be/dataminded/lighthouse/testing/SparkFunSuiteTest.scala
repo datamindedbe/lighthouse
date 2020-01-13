@@ -1,6 +1,6 @@
 package be.dataminded.lighthouse.testing
 
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 class SparkFunSuiteTest extends SparkFunSuite with Matchers {
 
