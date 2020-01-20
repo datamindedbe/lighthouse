@@ -6,9 +6,11 @@ import be.dataminded.lighthouse.testing.SharedSparkSession
 import better.files._
 import org.apache.spark.sql.Dataset
 import org.apache.spark.storage.StorageLevel
-import org.scalatest.{BeforeAndAfter, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class RichSparkFunctionsSpec extends FunSpec with Matchers with SharedSparkSession with BeforeAndAfter {
+class RichSparkFunctionsSpec extends AnyFunSpec with Matchers with SharedSparkSession with BeforeAndAfter {
 
   import spark.implicits._
 
@@ -56,7 +58,7 @@ class RichSparkFunctionsSpec extends FunSpec with Matchers with SharedSparkSessi
     }
 
     it("can be be used as a Dataset") {
-      function.as[Int].run(spark) shouldBe a[Dataset[Int]]
+      function.as[Int].run(spark) shouldBe a[Dataset[_]]
     }
   }
 

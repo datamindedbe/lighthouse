@@ -4,14 +4,9 @@ import be.dataminded.lighthouse.testing.{DatasetComparer, SparkFunSuite}
 import better.files._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
-import org.scalatest.{BeforeAndAfterAll, Matchers}
+import org.scalatest.matchers.should.Matchers
 
-class AirplanePipelineSpec
-    extends SparkFunSuite
-    with AirplanePipeline
-    with Matchers
-    with BeforeAndAfterAll
-    with DatasetComparer {
+class AirplanePipelineSpec extends SparkFunSuite with AirplanePipeline with Matchers with DatasetComparer {
 
   import spark.implicits._
 

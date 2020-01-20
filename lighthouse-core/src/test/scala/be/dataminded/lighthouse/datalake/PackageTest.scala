@@ -2,9 +2,10 @@ package be.dataminded.lighthouse.datalake
 
 import java.util.Properties
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class PackageTest extends FunSpec with Matchers {
+class PackageTest extends AnyFunSpec with Matchers {
 
   describe("asProperties") {
     it("should convert a Scala to Java Properties implicitly") {

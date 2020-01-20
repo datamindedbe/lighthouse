@@ -2,9 +2,11 @@ package be.dataminded.lighthouse.pipeline
 
 import be.dataminded.lighthouse.testing.SharedSparkSession
 import better.files._
-import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class SingleFileSinkSpec extends FunSpec with SharedSparkSession with Matchers with BeforeAndAfterEach {
+class SingleFileSinkSpec extends AnyFunSpec with SharedSparkSession with Matchers with BeforeAndAfterEach {
 
   import spark.implicits._
 

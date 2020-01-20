@@ -8,14 +8,15 @@ import be.dataminded.lighthouse.spark.Csv
 import be.dataminded.lighthouse.testing.SparkFunSuite
 import better.files._
 import org.apache.spark.sql.types._
-import org.scalatest.{BeforeAndAfter, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.matchers.should.Matchers
 
 class FileSystemDataLinkTest extends SparkFunSuite with Matchers with BeforeAndAfter {
 
   import spark.implicits._
 
-  val customerPath: String = File.resource("customers.csv").pathAsString
-  val ordersPath: String   = File.resource("orders.csv").pathAsString
+  val customerPath: String = Resource.getUrl("customers.csv").getPath()
+  val ordersPath: String   = Resource.getUrl("orders.csv").getPath()
   val options              = Map("header" -> "true")
 
   test("A FileSystemDataLink can read a DataFrame from a local file") {
@@ -76,6 +77,6 @@ class FileSystemDataLinkTest extends SparkFunSuite with Matchers with BeforeAndA
   }
 
   after {
-    file"target/output".delete(true)
+    file"target/output".delete(swallowIOExceptions = true)
   }
 }

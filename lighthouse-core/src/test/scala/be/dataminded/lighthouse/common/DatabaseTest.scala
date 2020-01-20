@@ -1,8 +1,9 @@
 package be.dataminded.lighthouse.common
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class DatabaseTest extends FunSpec with Matchers {
+class DatabaseTest extends AnyFunSpec with Matchers {
 
   describe("An in-memory database") {
 

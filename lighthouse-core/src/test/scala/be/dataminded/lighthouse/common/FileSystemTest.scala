@@ -2,13 +2,14 @@ package be.dataminded.lighthouse.common
 
 import java.nio.file.NoSuchFileException
 
-import better.files.File
-import org.scalatest.{FunSuite, Matchers}
+import better.files.Resource
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class FileSystemTest extends FunSuite with Matchers {
+class FileSystemTest extends AnyFunSuite with Matchers {
 
   test("Can read a file as a string") {
-    val content = FileSystem.read(File.resource("customers.csv").pathAsString)
+    val content = FileSystem.read(Resource.getUrl("customers.csv").getPath())
     content should not be empty
   }
 

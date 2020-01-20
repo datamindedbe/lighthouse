@@ -1,6 +1,7 @@
 package be.dataminded.lighthouse.testing
 
-import org.scalatest.{FunSuite, Tag}
+import org.scalatest.Tag
+import org.scalatest.funsuite.AnyFunSuite
 
 case object SparkTest            extends Tag("be.dataminded.lighthouse.testing.SparkTest")
 case object SparkIntegrationTest extends Tag("be.dataminded.lighthouse.testing.SparkIntegrationTest")
@@ -8,7 +9,7 @@ case object SparkIntegrationTest extends Tag("be.dataminded.lighthouse.testing.S
 /**
   * Base class for testing Spark-based applications.
   */
-class SparkFunSuite extends FunSuite with SharedSparkSession {
+class SparkFunSuite extends AnyFunSuite with SharedSparkSession {
 
   def test(name: String)(body: => Any /* Assertion */ ): Unit = {
     test(name, SparkTest) {
@@ -17,7 +18,7 @@ class SparkFunSuite extends FunSuite with SharedSparkSession {
   }
 }
 
-class SparkIntegrationFunSuite extends FunSuite with SharedSparkSession {
+class SparkIntegrationFunSuite extends AnyFunSuite with SharedSparkSession {
 
   def test(name: String)(body: => Any /* Assertion */ ): Unit = {
     test(name, SparkIntegrationTest) {
