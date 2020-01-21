@@ -7,10 +7,11 @@ project/plugins/project/
 .history
 .cache
 .lib/
-.metals/
-.bloop/
 
 ### Scala template
+.metals/
+.bloop/
+project/metals.sbt
 *.class
 *.log
 
