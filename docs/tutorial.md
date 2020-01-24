@@ -16,13 +16,13 @@ Start by adding the Lighthouse dependency to your project. In case you are using
 <dependency>
     <groupId>be.dataminded</groupId>
     <artifactId>lighthouse_2.11</artifactId>
-    <version>0.2.5</version>
+    <version>0.2.7</version>
 </dependency>
 ```
 or sbt:
 
 ```scala
-libraryDependencies += "be.dataminded" %% "lighthouse" % "0.2.5"
+libraryDependencies += "be.dataminded" %% "lighthouse" % "0.2.7"
 ```
 You can also manually clone and build Lighthouse. You can get the repo here:
 ```
