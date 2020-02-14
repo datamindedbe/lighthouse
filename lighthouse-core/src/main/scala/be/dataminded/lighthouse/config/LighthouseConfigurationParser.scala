@@ -29,7 +29,7 @@ class LighthouseConfigurationParser extends OptionParser[LighthouseConfiguration
 
   opt[String]('e', "environment")
     .action((environment, config) => config.copy(environment = environment))
-    .withFallback(fallbackEnvironment)
+    .withFallback((() => LighthouseConfigurationParser.this.fallbackEnvironment()))
     .validate(item => if (item.nonEmpty) success else failure("The configured environment for Lighthouse is empty"))
     .required()
 

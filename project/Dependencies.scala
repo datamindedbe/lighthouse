@@ -2,8 +2,8 @@ import sbt._
 
 object Dependencies {
 
-  private val amazonSdkVersion = "1.11.659"
-  private val sparkVersion     = "2.4.4"
+  private val amazonSdkVersion = "1.11.682"
+  private val sparkVersion     = "2.4.5"
 
   val sparkCore = "org.apache.spark" %% "spark-core"  % sparkVersion % Provided
   val sparkSql  = "org.apache.spark" %% "spark-sql"   % sparkVersion % Provided

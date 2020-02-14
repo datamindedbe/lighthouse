@@ -1,6 +1,6 @@
 # Lighthouse
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/be.dataminded/lighthouse_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/be.dataminded/lighthouse)
-[![CircleCI](https://circleci.com/gh/datamindedbe/lighthouse.svg?style=svg)](https://circleci.com/gh/datamindedbe/lighthouse)
+[![CI](https://github.com/mrgambal/lighthouse/workflows/CI/badge.svg)](https://github.com/mrgambal/lighthouse/actions?query=workflow%3ACI)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a0cb9f75da0a4df887b06d37434cfc04)](https://www.codacy.com/app/mLavaert/lighthouse?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datamindedbe/lighthouse&amp;utm_campaign=Badge_Grade)
 
 Lighthouse is a library for data lakes built on top of [Apache Spark](http://spark.apache.org/). 

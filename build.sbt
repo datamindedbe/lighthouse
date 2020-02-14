@@ -6,7 +6,7 @@ import sbt.Opts.resolver.sonatypeStaging
 lazy val buildSettings = Seq(
   organization := "be.dataminded",
   scalaVersion := scala211,
-  crossScalaVersions := Nil,
+  crossScalaVersions := supportedScalaVersions,
   // Ensure code quality
   scalafmtOnCompile := true,
   // Memory settings to be able to test with Spark
@@ -15,14 +15,14 @@ lazy val buildSettings = Seq(
   javaOptions ++= Seq(
     "-Xms768M",
     "-Xmx2048M",
-    "-XX:+CMSClassUnloadingEnabled",
+    "-XX:+UseStringDeduplication",
+    "-XX:+UseG1GC",
     "-Dspark.sql.shuffle.partitions=2",
     "-Dspark.shuffle.sort.bypassMergeThreshold=2",
     "-Dlighthouse.environment=test"
   ),
   scalacOptions ++= Seq(
     "-deprecation",
-    "-optimize",
     "-unchecked",
     "-Ydelambdafy:inline",
     "-Ypartial-unification",
@@ -61,8 +61,7 @@ lazy val lighthouse = (project in file("lighthouse-core"))
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))
   .settings(
     buildSettings,
-    libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles),
-    crossScalaVersions := supportedScalaVersions
+    libraryDependencies ++= Seq(sparkSql, sparkHive, scalaTest, betterFiles)
   )
 
 lazy val `lighthouse-demo` = (project in file("lighthouse-demo"))
