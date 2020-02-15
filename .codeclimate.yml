@@ -1,0 +1,19 @@
+---
+version: 2
+checks:
+  identical-code:
+    config:
+      threshold: 25
+  similar-code:
+    config:
+      threshold: 60
+plugins:
+  duplication:
+    enabled: true
+    config:
+      languages:
+        scala:
+  scalastyle:
+    enabled: true
+  fixme:
+    enabled: true
