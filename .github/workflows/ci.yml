@@ -1,0 +1,59 @@
+name: CI
+on:
+  push:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        scala: ["2.12.10", "2.11.12"]
+
+    runs-on: ubuntu-latest
+
+    env:
+      CC_TEST_REPORTER_ID: ${{ secrets.CODECOV_SECRET }}
+      SCALA_VERSION: ${{ matrix.scala }}
+
+    steps:
+      - uses: olafurpg/setup-scala@v7
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Cache Coursier cache
+        uses: actions/cache@v1.1.2
+        with:
+          path: ~/.coursier
+          key: ${{ runner.os }}-sbt-coursier-cache-${{ matrix.scala }}-${{ hashFiles(format('{0}/{1}', github.workspace, 'project/Dependencies.scala')) }}
+
+      - name: Cache SBT Ivy2 cache
+        uses: actions/cache@v1.1.2
+        with:
+          path: ~/.ivy2
+          key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles(format('{0}/{1}', github.workspace, 'project/Dependencies.scala')) }}-${{ matrix.scala }}
+
+      - name: Cache SBT
+        uses: actions/cache@v1.1.2
+        with:
+          path: ~/.sbt
+          key: ${{ runner.os }}-sbt-sbt-cache-${{ hashFiles(format('{0}/{1}', github.workspace, 'project/Dependencies.scala')) }}-${{ matrix.scala }}
+
+      - name: Install CodeClimate coverage harness
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
+          chmod +x ./cc-test-reporter;
+          ./cc-test-reporter before-build;
+
+      - name: Compile
+        run: sbt ++${{ matrix.scala }} compile
+
+      - name: Test
+        id: test
+        run: sbt ++${{ matrix.scala }} coverage test coverageReport coverageAggregate;
+
+      - name: Send coverage data
+        run: |
+          export SCALA_BINARY="${SCALA_VERSION:0:4}";
+          ./cc-test-reporter format-coverage -d -t cobertura ./target/scala-$SCALA_BINARY/coverage-report/cobertura.xml && \
+          ./cc-test-reporter upload-coverage -d;
