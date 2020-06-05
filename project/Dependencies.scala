@@ -3,7 +3,7 @@ import sbt._
 object Dependencies {
 
   private val amazonSdkVersion = "1.11.659"
-  private val sparkVersion     = "2.4.4"
+  private val sparkVersion     = "2.4.5"
 
   val sparkCore = "org.apache.spark" %% "spark-core"  % sparkVersion % Provided
   val sparkSql  = "org.apache.spark" %% "spark-sql"   % sparkVersion % Provided
@@ -18,7 +18,7 @@ object Dependencies {
   val betterFiles    = "com.github.pathikrit"       %% "better-files"   % "3.8.0"
 
   // Database connectivity
-  val scalikejdbc = "org.scalikejdbc" %% "scalikejdbc" % "3.4.0"
+  val scalikejdbc = "org.scalikejdbc" %% "scalikejdbc" % "3.4.2"
   val h2          = "com.h2database"  % "h2"           % "1.4.200" % Test
 
   // Amazon AWS
@@ -26,7 +26,7 @@ object Dependencies {
   val awsSdkSsm = "com.amazonaws" % "aws-java-sdk-ssm" % amazonSdkVersion % Provided
   val amazonSdk = Seq(awsSdkS3, awsSdkSsm)
 
-  val scalaTest        = "org.scalatest" %% "scalatest" % "3.1.0"
+  val scalaTest        = "org.scalatest" %% "scalatest" % "3.1.2"
   val testDependencies = Seq(scalaTest % Test, h2)
 
   val commonDependencies: Seq[ModuleID] =

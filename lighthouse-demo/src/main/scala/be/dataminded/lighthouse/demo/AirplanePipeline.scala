@@ -35,34 +35,38 @@ trait AirplanePipeline {
       .mapN(buildView)
       .write(AirplaneDatalake("master" -> "view"))
 
-  private def cleanDailyWeather(dailyWeather: DataFrame) = SparkFunction { spark =>
-    import spark.implicits._
+  private def cleanDailyWeather(dailyWeather: DataFrame) =
+    SparkFunction { spark =>
+      import spark.implicits._
 
-    val toCelsius = udf((temp: Int) => ((temp - 32) / 1.8).toInt)
+      val toCelsius = udf((temp: Int) => ((temp - 32) / 1.8).toInt)
 
-    dailyWeather
-      .select('WBAN, 'YearMonthDay, 'Tmin, 'Tmax, 'Tavg, 'PrecipTotal, 'AvgSpeed)
-      .withColumn("Tmin", toCelsius('Tmin))
-      .withColumn("Tmax", toCelsius('Tmax))
-      .withColumn("Tavg", toCelsius('Tavg))
-      .withColumnRenamed("AvgSpeed", "WAvgSpeed")
-  }
+      dailyWeather
+        .select('WBAN, 'YearMonthDay, 'Tmin, 'Tmax, 'Tavg, 'PrecipTotal, 'AvgSpeed)
+        .withColumn("Tmin", toCelsius('Tmin))
+        .withColumn("Tmax", toCelsius('Tmax))
+        .withColumn("Tavg", toCelsius('Tavg))
+        .withColumnRenamed("AvgSpeed", "WAvgSpeed")
+    }
 
-  protected def cleanWeatherStations(weatherStations: DataFrame) = SparkFunction { spark =>
-    import spark.implicits._
+  protected def cleanWeatherStations(weatherStations: DataFrame) =
+    SparkFunction { spark =>
+      import spark.implicits._
 
-    weatherStations.select('WBAN, 'CallSign).withColumnRenamed("CallSign", "IAT").distinct()
-  }
+      weatherStations.select('WBAN, 'CallSign).withColumnRenamed("CallSign", "IAT").distinct()
+    }
 
-  private def cleanAirlines(airlines: DataFrame) = SparkFunction { spark =>
-    import spark.implicits._
+  private def cleanAirlines(airlines: DataFrame) =
+    SparkFunction { spark =>
+      import spark.implicits._
 
-    val timestamp = udf((year: String, month: String, day: String) => f"$year${month.toInt}%02d${day.toInt}%02d".toInt)
+      val timestamp =
+        udf((year: String, month: String, day: String) => f"$year${month.toInt}%02d${day.toInt}%02d".toInt)
 
-    airlines
-      .select('Origin, 'Dest, 'Year, 'Month, 'DayofMonth, 'DayOfWeek, 'ArrDelay)
-      .withColumn("YearMonthDay", timestamp('Year, 'Month, 'DayofMonth))
-  }
+      airlines
+        .select('Origin, 'Dest, 'Year, 'Month, 'DayofMonth, 'DayOfWeek, 'ArrDelay)
+        .withColumn("YearMonthDay", timestamp('Year, 'Month, 'DayofMonth))
+    }
 
   private def dailyWeatherWithStation(dailyWeather: DataFrame, weatherStations: DataFrame) = {
     dailyWeather.join(weatherStations, "WBAN").drop("WBAN")

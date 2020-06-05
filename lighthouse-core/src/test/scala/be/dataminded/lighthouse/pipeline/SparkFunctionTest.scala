@@ -138,10 +138,11 @@ class SparkFunctionTest
       val orders    = Sources.fromCsv(ordersPath)
 
       // I wrap this in a SparkFunction again because I need the SparkSession to import the implicits
-      def countOrdersByCustomer(orders: DataFrame): SparkFunction[DataFrame] = SparkFunction { spark =>
-        import spark.implicits._
-        orders.groupBy('customerId).agg(count('id).as("count"))
-      }
+      def countOrdersByCustomer(orders: DataFrame): SparkFunction[DataFrame] =
+        SparkFunction { spark =>
+          import spark.implicits._
+          orders.groupBy('customerId).agg(count('id).as("count"))
+        }
 
       // No need for SparkSession, just a normal function
       def joinCustomersWithOrders(customers: DataFrame, ordersByCustomer: DataFrame): DataFrame = {
@@ -225,15 +226,15 @@ class SparkFunctionTest
 
       def dedup(persons: Dataset[RawPerson]): Dataset[RawPerson] = persons.distinct()
 
-      def normalize(persons: Dataset[RawPerson]): SparkFunction[Dataset[BasePerson]] = SparkFunction {
-        spark: SparkSession =>
+      def normalize(persons: Dataset[RawPerson]): SparkFunction[Dataset[BasePerson]] =
+        SparkFunction { spark: SparkSession =>
           import spark.implicits._
 
           persons.map { raw =>
             val tokens = raw.name.split(" ")
             BasePerson(tokens(0), tokens(1), raw.age)
           }
-      }
+        }
 
       def returnBase(basePersons: Dataset[BasePerson]): Dataset[BasePerson] = basePersons
     }

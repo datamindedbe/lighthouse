@@ -22,9 +22,10 @@ object SparkFunction {
       override def run(spark: SparkSession): A = function(spark)
     }
 
-  def of[A](block: => A): SparkFunction[A] = new SparkFunction[A] {
-    override def run(spark: SparkSession): A = block
-  }
+  def of[A](block: => A): SparkFunction[A] =
+    new SparkFunction[A] {
+      override def run(spark: SparkSession): A = block
+    }
 
   implicit val monad: Monad[SparkFunction] = new Monad[SparkFunction] {
     override def pure[A](x: A): SparkFunction[A] = SparkFunction(_ => x)
