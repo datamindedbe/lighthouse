@@ -39,10 +39,11 @@ trait Datalake {
     */
   def getDataLink(dataUID: DataUID): DataLink = enabledEnvironment(dataUID)
 
-  protected def environment(name: String)(f: EnvironmentBuilder => EnvironmentBuilder): Unit = name match {
-    case envName if envName == environmentName => enabledEnvironment = f(newEmptyEnvironment()).result()
-    case _                                     =>
-  }
+  protected def environment(name: String)(f: EnvironmentBuilder => EnvironmentBuilder): Unit =
+    name match {
+      case envName if envName == environmentName => enabledEnvironment = f(newEmptyEnvironment()).result()
+      case _                                     =>
+    }
 
   private def newEmptyEnvironment() = new mutable.MapBuilder[DataUID, DataLink, Environment](Map.empty)
 }

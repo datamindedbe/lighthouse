@@ -21,7 +21,8 @@ class FileParamStore(path: String, overrides: Map[String, String] = Map.empty) e
     * Returns the lookup function to find a particular setting
     * @param key The key to retrieve
     */
-  def lookup(key: String): LazyConfig[String] = LazyConfig {
-    config.getString(key)
-  }
+  def lookup(key: String): LazyConfig[String] =
+    LazyConfig {
+      config.getString(key)
+    }
 }
