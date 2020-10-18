@@ -5,7 +5,7 @@ import sbt.Opts.resolver.sonatypeStaging
 
 lazy val buildSettings = Seq(
   organization := "be.dataminded",
-  scalaVersion := scala211,
+  scalaVersion := scala212,
   crossScalaVersions := supportedScalaVersions,
   // Ensure code quality
   scalafmtOnCompile := true,
@@ -62,7 +62,6 @@ lazy val lighthouse = (project in file("lighthouse-core"))
   .settings(
     buildSettings,
     libraryDependencies ++= commonDependencies ++ Seq(cats, typesafeConfig),
-    crossScalaVersions := supportedScalaVersions
   )
 
 lazy val `lighthouse-testing` = (project in file("lighthouse-testing"))

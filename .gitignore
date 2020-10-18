@@ -11,6 +11,7 @@ project/plugins/project/
 ### Scala template
 .metals/
 .bloop/
+.bsp/
 project/metals.sbt
 *.class
 *.log
