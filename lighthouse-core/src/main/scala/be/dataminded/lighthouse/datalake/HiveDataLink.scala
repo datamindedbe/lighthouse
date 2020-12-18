@@ -107,6 +107,7 @@ class HiveDataLink(
         } else {
           dataset.write
             .format(format.toString)
+            .partitionBy(partitionedBy: _*)
             .mode(saveMode)
             .options(options)
             .insertInto(table())
