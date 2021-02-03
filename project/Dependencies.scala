@@ -11,7 +11,7 @@ object Dependencies {
   val sparkMlib = "org.apache.spark" %% "spark-mllib" % sparkVersion % Provided
 
   val scopt          = "com.github.scopt"           %% "scopt"          % "3.7.1"
-  val typesafeConfig = "com.typesafe"               % "config"          % "1.4.0"
+  val typesafeConfig = "com.typesafe"               % "config"          % "1.4.1"
   val logback        = "ch.qos.logback"             % "logback-classic" % "1.2.3"
   val scalaLogging   = "com.typesafe.scala-logging" %% "scala-logging"  % "3.9.2"
   val cats           = "org.typelevel"              %% "cats-core"      % "2.2.0"
@@ -26,7 +26,7 @@ object Dependencies {
   val awsSdkSsm = "com.amazonaws" % "aws-java-sdk-ssm" % amazonSdkVersion % Provided
   val amazonSdk = Seq(awsSdkS3, awsSdkSsm)
 
-  val scalaTest        = "org.scalatest" %% "scalatest" % "3.2.2"
+  val scalaTest        = "org.scalatest" %% "scalatest" % "3.2.3"
   val testDependencies = Seq(scalaTest % Test, h2)
 
   val commonDependencies: Seq[ModuleID] =
