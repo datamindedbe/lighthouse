@@ -40,7 +40,8 @@ lazy val buildSettings = Seq(
   git.baseVersion := "0.0.0",
   // Publish like Maven
   publishMavenStyle := true,
-  publishTo := Some(if (isSnapshot.value) datamindedSnapshots else sonatypeStaging),
+  publishTo := Some(if (isSnapshot.value) datamindedSnapshots else gyReleases),
+  credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
   homepage := Some(url("https://github.com/datamindedbe/lighthouse")),
   scmInfo := Some(
     ScmInfo(url("https://github.com/datamindedbe/lighthouse"), "git@github.com:datamindedbe/lighthouse.git")
