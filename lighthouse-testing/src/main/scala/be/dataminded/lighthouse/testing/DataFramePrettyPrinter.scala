@@ -4,7 +4,8 @@ import java.sql.Date
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.catalyst.util.DateTimeUtils
+import org.apache.spark.sql.catalyst.util.{DateFormatter, DateTimeUtils}
+import org.apache.spark.sql.internal.SQLConf
 
 private[testing] object DataFramePrettyPrinter {
 
@@ -25,7 +26,9 @@ private[testing] object DataFramePrettyPrinter {
             case array: Array[_]     => array.mkString("[", ", ", "]")
             case seq: Seq[_]         => seq.mkString("[", ", ", "]")
             case d: Date =>
-              DateTimeUtils.dateToString(DateTimeUtils.fromJavaDate(d))
+              val zoneId        = DateTimeUtils.getZoneId(SQLConf.get.sessionLocalTimeZone)
+              val dateFormatter = DateFormatter(zoneId)
+              dateFormatter.format(DateTimeUtils.fromJavaDate(d))
             case _ => cell.toString
           }
           if (truncate > 0 && str.length > truncate) {
