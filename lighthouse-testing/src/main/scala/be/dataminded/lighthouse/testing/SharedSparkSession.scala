@@ -25,6 +25,7 @@ trait SharedSparkSession {
     .config("spark.sql.warehouse.dir", localWarehousePath)
     .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     .config("spark.sql.avro.compression.codec", "snappy")
+    .config("spark.sql.orc.compression.codec", "snappy")
     .config("spark.sql.parquet.compression.codec", "snappy")
     .config("spark.ui.enabled", "false")
     .config("spark.sql.sources.partitionOverwriteMode", "dynamic")
