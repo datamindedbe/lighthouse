@@ -7,7 +7,7 @@ import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest
 /**
   * Class to help retrieve parameters from the AWS parameter store using [[GetParameterRequest]]
   */
-class AwsSsmParamStore() extends ParameterStore {
+class AwsSsmParamStore private () extends ParameterStore {
 
   private lazy val client = AWSSimpleSystemsManagementClientBuilder.defaultClient()
 
