@@ -4,8 +4,7 @@ import java.sql.Date
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.catalyst.util.{DateFormatter, DateTimeUtils}
-import org.apache.spark.sql.internal.SQLConf
+import java.time.format.DateTimeFormatter
 
 private[testing] object DataFramePrettyPrinter {
 
@@ -17,20 +16,20 @@ private[testing] object DataFramePrettyPrinter {
 
     val header = df.schema.fieldNames.toSeq
 
+    // For array values, replace Seq and Array with square brackets.
+    // For cells that are beyond `truncate` characters, replace it with the
+    // first `truncate-3` and "...".
     def asReadableRows = {
       data.map { row =>
-        row.toSeq.map { cell =>
+        row.toSeq.view.map { cell =>
           val str = cell match {
             case null                => "null"
             case binary: Array[Byte] => binary.map("%02X".format(_)).mkString("[", " ", "]")
-            case array: Array[_]     => array.mkString("[", ", ", "]")
-            case seq: Seq[_]         => seq.mkString("[", ", ", "]")
-            case d: Date =>
-              val zoneId        = DateTimeUtils.getZoneId(SQLConf.get.sessionLocalTimeZone)
-              val dateFormatter = DateFormatter(zoneId)
-              dateFormatter.format(DateTimeUtils.fromJavaDate(d))
-            case _ => cell.toString
+            case seq: Traversable[_] => seq.mkString("[", ", ", "]")
+            case d: Date             => DateTimeFormatter.ISO_LOCAL_DATE.format(d.toLocalDate())
+            case _                   => cell.toString
           }
+
           if (truncate > 0 && str.length > truncate) {
             // do not show ellipses for strings shorter than 4 characters.
             if (truncate < 4) str.substring(0, truncate)
@@ -42,54 +41,31 @@ private[testing] object DataFramePrettyPrinter {
       }
     }
 
-    // For array values, replace Seq and Array with square brackets
-    // For cells that are beyond `truncate` characters, replace it with the
-    // first `truncate-3` and "..."
-    val rows: Seq[Seq[String]] = header +: asReadableRows
-
-    val sb = new StringBuilder
-
+    val rows = (header +: asReadableRows).view
     // Initialise the width of each column to a minimum value of '3'
     val colWidths = Array.fill(header.length)(3)
 
-    // Compute the width of each column
-    for (row <- rows) {
-      for ((cell, i) <- row.zipWithIndex) {
-        colWidths(i) = math.max(colWidths(i), cell.length)
-      }
-    }
+    // Compute the maximal width of each column.
+    for {
+      row       <- rows
+      (cell, i) <- row.zipWithIndex
+    } colWidths(i) = math.max(colWidths(i), cell.length)
 
-    // Create SeparateLine
+    // (rows + 3 separator lines + has more rows) * (total content + separators + ending)
+    val sb = new StringBuilder((numRows + 4) * (colWidths.sum + numRows + 2))
+    // Create separator line.
     val sep: String = colWidths.map("-" * _).addString(sb, "+", "+", "+\n").toString()
+    // Choose padding implementation.
+    val pad: (String, Int) => String = if (truncate > 0) StringUtils.leftPad else StringUtils.rightPad
 
-    // column names
-    rows.head.zipWithIndex
-      .map {
-        case (cell, i) =>
-          if (truncate > 0) {
-            StringUtils.leftPad(cell, colWidths(i))
-          } else {
-            StringUtils.rightPad(cell, colWidths(i))
-          }
-      }
-      .addString(sb, "|", "|", "|\n")
-
-    sb.append(sep)
-
-    // data
-    rows.tail.map {
-      _.zipWithIndex
-        .map {
-          case (cell, i) =>
-            if (truncate > 0) {
-              StringUtils.leftPad(cell.toString, colWidths(i))
-            } else {
-              StringUtils.rightPad(cell.toString, colWidths(i))
-            }
-        }
-        .addString(sb, "|", "|", "|\n")
-    }
-
+    (for {
+      row       <- rows
+      (cell, i) <- row.zipWithIndex
+    } yield pad(cell, colWidths(i)))
+      .grouped(colWidths.size)
+      .foreach(_.addString(sb, "|", "|", "|\n"))
+    // Add separators after the header and after the last row.
+    sb.insert(sep.length() * 2, sep)
     sb.append(sep)
 
     // For Data that has more than "numRows" records

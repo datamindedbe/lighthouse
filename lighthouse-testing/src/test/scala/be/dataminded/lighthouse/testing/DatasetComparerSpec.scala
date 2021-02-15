@@ -1,8 +1,10 @@
 package be.dataminded.lighthouse.testing
 
 import org.scalatest.funspec.AnyFunSpec
+import java.sql.Date
 
 private case class Person(name: String, age: Int)
+private case class Measurement(date: Date, values: Array[Byte])
 
 class DatasetComparerSpec extends AnyFunSpec with SharedSparkSession with DatasetComparer {
 
@@ -21,6 +23,21 @@ class DatasetComparerSpec extends AnyFunSpec with SharedSparkSession with Datase
       val expected = Seq(Person("frank", 5), Person("bob", 1)).toDS
 
       assertDatasetEquality(actual, expected, orderedComparison = false)
+    }
+
+    it("throws an error for unordered Dataset comparisons with Arrays (hint: use Seq or Vector instead)") {
+      val actual = Seq(
+        Measurement(Date.valueOf("2020-01-01"), Array(1, 5, 8)),
+        Measurement(Date.valueOf("2020-01-02"), Array(5, 2))
+      ).toDS
+      val expected = Seq(
+        Measurement(Date.valueOf("2020-01-02"), Array(5, 2)),
+        Measurement(Date.valueOf("2020-01-01"), Array(1, 5, 8))
+      ).toDS
+
+      intercept[AssertionError] {
+        assertDatasetEquality(actual, expected, orderedComparison = false)
+      }
     }
 
     it("throws an error for unordered Dataset comparisons that don't match") {

@@ -16,6 +16,7 @@ trait SparkSessions {
     "spark.driver.memory"                                    -> "2g",
     "spark.serializer"                                       -> "org.apache.spark.serializer.KryoSerializer",
     "spark.sql.avro.compression.codec"                       -> "snappy",
+    "spark.sql.orc.compression.codec"                        -> "snappy",
     "spark.sql.parquet.compression.codec"                    -> "snappy",
     "spark.sql.sources.partitionColumnTypeInference.enabled" -> "false",
     "spark.sql.sources.partitionOverwriteMode"               -> "dynamic"

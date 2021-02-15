@@ -7,7 +7,6 @@ import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 /**
   * Reference to data stored on hive
   *
-  *
   * For different combinations with saveMode and overwriteBehavior different implementations are used.
   * The cases are:
   *
@@ -19,7 +18,6 @@ import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
   * _ => All the other cases.
   *
   * You can see the code on how they are implemented.
-  *
   *
   * @constructor create a new hive data reference
   * @param path               The location on the file system
@@ -51,6 +49,11 @@ class HiveDataLink(
   override def doWrite[T](dataset: Dataset[T], path: String): Unit = {
     spark.catalog.setCurrentDatabase(database())
 
+    val baseWriter = dataset.write
+      .format(format.toString)
+      .mode(saveMode)
+      .options(options)
+
     (saveMode, overwriteBehavior) match {
       // Only overwrite a single partition in this case
       case (SaveMode.Overwrite, PartitionOverwrite) =>
@@ -63,20 +66,13 @@ class HiveDataLink(
         // If table does not exist yet, create new table
         if (!spark.catalog.tableExists(table())) {
           // Create table
-          dataset.write
-            .format(format.toString)
+          baseWriter
             .partitionBy(partitionedBy: _*)
-            .mode(saveMode)
             .option("path", basePath)
-            .options(options)
             .saveAsTable(table())
         } else {
           // Write the dataset to the desired location. Don't use partitionBy as it lines up with path
-          dataset.write
-            .format(format.toString)
-            .mode(saveMode)
-            .options(options)
-            .save(path)
+          baseWriter.save(path)
 
           // Update partition information based on
           spark.catalog.recoverPartitions(table())
@@ -97,30 +93,20 @@ class HiveDataLink(
 
         if (!spark.catalog.tableExists(table())) {
           // Create table
-          dataset.write
-            .format(format.toString)
+          baseWriter
             .partitionBy(partitionedBy: _*)
-            .mode(saveMode)
             .option("path", path)
-            .options(options)
             .saveAsTable(table())
         } else {
-          dataset.write
-            .format(format.toString)
-            .mode(saveMode)
-            .options(options)
-            .insertInto(table())
+          baseWriter.insertInto(table())
         }
 
       // In any other case use default spark write behavior
       case _ =>
         // Just use the default spark/hive write behavior
-        dataset.write
-          .format(format.toString)
+        baseWriter
           .partitionBy(partitionedBy: _*)
-          .mode(saveMode)
           .option("path", path)
-          .options(options)
           .saveAsTable(table())
     }
   }

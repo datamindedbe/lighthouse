@@ -12,14 +12,14 @@ project/plugins/project/
 .metals/
 .bloop/
 .bsp/
-project/metals.sbt
+.ammonite/
+**/metals.sbt
 *.class
 *.log
 
-# Sensitive or high-churn files:
-.idea/
-
 ## File-based project format:
+.idea/
+.vscode/
 *.iws
 
 .DS_Store/
