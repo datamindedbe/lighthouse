@@ -27,6 +27,7 @@ trait SharedSparkSession {
     .config("spark.sql.avro.compression.codec", "snappy")
     .config("spark.sql.orc.compression.codec", "snappy")
     .config("spark.sql.parquet.compression.codec", "snappy")
+    .config("spark.sql.shuffle.partitions", 1)
     .config("spark.ui.enabled", "false")
     .config("spark.sql.sources.partitionOverwriteMode", "dynamic")
     .enableHiveSupport()
